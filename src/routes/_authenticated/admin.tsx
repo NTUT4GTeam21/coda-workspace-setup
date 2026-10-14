@@ -33,13 +33,13 @@ function Admin() {
 
   async function setQualified(id: string, v: boolean) {
     const { error } = await supabase.rpc("set_volunteer_qualified", { _user_id: id, _qualified: v });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["admin-volunteers"] });
     qc.invalidateQueries({ queryKey: ["me"] });
   }
   async function setAdmin(id: string, v: boolean) {
     const { error } = await supabase.rpc("set_admin_role", { _user_id: id, _is_admin: v });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["admin-volunteers"] });
   }
 
