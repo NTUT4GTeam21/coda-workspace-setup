@@ -266,6 +266,8 @@ export type Database = {
           last_login_at: string | null
           qualified: boolean
           quiz_passed_at: string | null
+          requested_role: string
+          volunteer_code: string | null
         }
         Insert: {
           created_at?: string
@@ -275,6 +277,8 @@ export type Database = {
           last_login_at?: string | null
           qualified?: boolean
           quiz_passed_at?: string | null
+          requested_role?: string
+          volunteer_code?: string | null
         }
         Update: {
           created_at?: string
@@ -284,6 +288,8 @@ export type Database = {
           last_login_at?: string | null
           qualified?: boolean
           quiz_passed_at?: string | null
+          requested_role?: string
+          volunteer_code?: string | null
         }
         Relationships: []
       }
@@ -521,6 +527,38 @@ export type Database = {
         }
         Relationships: []
       }
+      volunteer_codes: {
+        Row: {
+          code: string
+          created_at: string
+          label: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          label?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          label?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_codes_used_by_fkey"
+            columns: ["used_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       word_cards: {
         Row: {
           book_id: string
@@ -573,7 +611,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_staff: {
+        Args: { _approve: boolean; _user_id: string }
+        Returns: undefined
+      }
       can_access_child: { Args: { _child_id: string }; Returns: boolean }
+      can_read_content: { Args: never; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -590,10 +633,11 @@ export type Database = {
         Args: { _qualified: boolean; _user_id: string }
         Returns: undefined
       }
+      submit_guide_quiz: { Args: { _answers: number[] }; Returns: boolean }
       touch_last_login: { Args: never; Returns: undefined }
     }
     Enums: {
-      app_role: "admin" | "volunteer"
+      app_role: "admin" | "volunteer" | "viewer"
       content_status: "draft" | "approved"
     }
     CompositeTypes: {
@@ -722,7 +766,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "volunteer"],
+      app_role: ["admin", "volunteer", "viewer"],
       content_status: ["draft", "approved"],
     },
   },

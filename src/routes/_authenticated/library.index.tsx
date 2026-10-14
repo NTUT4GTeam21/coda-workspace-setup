@@ -83,7 +83,7 @@ function Library() {
       {error && <p className="text-destructive">Could not load books.</p>}
       {books && books.length === 0 && (
         <p className="rounded-2xl border bg-secondary p-4 text-secondary-foreground">
-          The library unlocks once you're qualified. Finish the Volunteer Guide and quiz first.
+          The library unlocks once you're qualified. Finish the Volunteer Guide and quiz first (see Guide in the menu).
         </p>
       )}
 

@@ -8,6 +8,13 @@
       "when": 1791982709801,
       "tag": "0000_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791983817022,
+      "tag": "0001_roles_codes_guide",
+      "breakpoints": true
     }
   ]
 }

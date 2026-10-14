@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, Home, LogOut, Shield } from "lucide-react";
+import { BookOpen, GraduationCap, Home, LogOut, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useMe } from "@/lib/auth";
@@ -34,6 +34,11 @@ export function AppHeader() {
           <Link to="/library" className={linkCls} activeProps={{ className: activeCls }}>
             <BookOpen className="h-4 w-4" aria-hidden /> Library
           </Link>
+          {me && !me.isViewer && (
+            <Link to="/guide" className={linkCls} activeProps={{ className: activeCls }}>
+              <GraduationCap className="h-4 w-4" aria-hidden /> Guide
+            </Link>
+          )}
           {me?.isAdmin && (
             <Link to="/admin" className={linkCls} activeProps={{ className: activeCls }}>
               <Shield className="h-4 w-4" aria-hidden /> Admin
