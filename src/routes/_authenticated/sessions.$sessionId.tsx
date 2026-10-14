@@ -42,7 +42,7 @@ function SessionPage() {
     e.preventDefault();
     if (!word.trim() || !s) return;
     const { error } = await supabase.from("tricky_words").insert({ child_id: s.child_id, session_id: sessionId, word: word.trim() });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setWord("");
     qc.invalidateQueries({ queryKey: key });
   }
@@ -53,7 +53,7 @@ function SessionPage() {
     const { error } = await supabase.from("handover_feedback").insert({ session_id: sessionId, ...fb });
     if (!error) await supabase.from("sessions").update({ status: "done" }).eq("id", sessionId);
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Session saved for the next volunteer.");
     qc.invalidateQueries();
   }

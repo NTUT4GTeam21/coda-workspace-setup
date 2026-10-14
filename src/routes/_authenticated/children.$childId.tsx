@@ -36,7 +36,7 @@ function ChildPage() {
   if (isLoading) return <p className="text-muted-foreground">Loading…</p>;
   if (!data?.child) return <p>Child not found, or not assigned to you.</p>;
   const { child, sessions, words, books } = data;
-  const lastNote = sessions.flatMap((s) => s.handover_feedback ?? []).find((h) => h.try_next || h.notes);
+  const lastNote = sessions.flatMap((s) => hfList(s.handover_feedback)).find((h) => h.try_next || h.notes);
 
   async function start() {
     if (!me) return;
@@ -47,7 +47,7 @@ function ChildPage() {
       .select("id")
       .single();
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     navigate({ to: "/sessions/$sessionId", params: { sessionId: s.id } });
   }
 
@@ -101,7 +101,7 @@ function ChildPage() {
               <li key={s.id}>
                 <Link to="/sessions/$sessionId" params={{ sessionId: s.id }} className="block rounded-xl border bg-card p-4 hover:border-primary">
                   <p className="font-semibold">{new Date(s.scheduled_at).toLocaleDateString()} · {s.books?.title ?? "No book"}</p>
-                  <p className="text-sm text-muted-foreground">{s.status === "done" ? "Finished" : "In progress"}{s.handover_feedback?.[0]?.worked_well ? ` · ${s.handover_feedback[0].worked_well}` : ""}</p>
+                  <p className="text-sm text-muted-foreground">{s.status === "done" ? "Finished" : "In progress"}{hfList(s.handover_feedback)[0]?.worked_well ? ` · ${hfList(s.handover_feedback)[0].worked_well}` : ""}</p>
                 </Link>
               </li>
             ))}
@@ -110,4 +110,9 @@ function ChildPage() {
       </section>
     </div>
   );
+}
+
+type HF = { notes: string; try_next: string; worked_well: string };
+function hfList(h: HF | HF[] | null | undefined): HF[] {
+  return h ? (Array.isArray(h) ? h : [h]) : [];
 }

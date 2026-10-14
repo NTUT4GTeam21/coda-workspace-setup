@@ -33,13 +33,14 @@ function Guide() {
   if (!data) return <p className="text-muted-foreground">Loading…</p>;
   const { cards, questions } = data;
   const onQuiz = step >= cards.length;
+  const card = cards[step];
 
   async function submit() {
     setBusy(true);
     const arr = questions.map((_, i) => answers[i] ?? -1);
     const { data: passed, error } = await supabase.rpc("submit_guide_quiz", { _answers: arr });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     if (passed) {
       toast.success("You passed! Children and sessions are now unlocked.");
       qc.invalidateQueries();
@@ -58,13 +59,13 @@ function Guide() {
         {onQuiz ? "Quiz" : `Card ${step + 1} of ${cards.length}`}
       </p>
 
-      {!onQuiz ? (
+      {!onQuiz && card ? (
         <article className="rounded-2xl border bg-card p-6">
-          <h2 className="text-2xl font-semibold">{cards[step].title}</h2>
+          <h2 className="text-2xl font-semibold">{card.title}</h2>
           <ol className="mt-4 list-decimal space-y-2 pl-5 text-lg">
-            {cards[step].steps.map((s, i) => <li key={i}>{s}</li>)}
+            {card.steps.map((s, i) => <li key={i}>{s}</li>)}
           </ol>
-          {cards[step].avoid_tip && <p className="mt-4 rounded-xl bg-muted p-3"><strong>Avoid:</strong> {cards[step].avoid_tip}</p>}
+          {card.avoid_tip && <p className="mt-4 rounded-xl bg-muted p-3"><strong>Avoid:</strong> {card.avoid_tip}</p>}
         </article>
       ) : (
         <div className="space-y-4">

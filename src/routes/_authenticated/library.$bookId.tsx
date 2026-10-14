@@ -77,7 +77,7 @@ function BookDetail() {
           <form className="mt-3 flex gap-2" onSubmit={async (e) => {
             e.preventDefault();
             const { error } = await supabase.from("books").update({ link_url: link || null }).eq("id", bookId);
-            if (error) return toast.error(error.message);
+            if (error) { toast.error(error.message); return; }
             toast.success("Book link saved");
             qc.invalidateQueries({ queryKey: ["book", bookId] });
           }}>
