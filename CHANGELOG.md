@@ -7,6 +7,12 @@ Format: `- YYYY-MM-DD · <module> · <what changed> (<author or "Lovable">)`
 
 ## Unreleased
 
+- 2026-10-14 · login · Sign-up now asks for role (Volunteer, Programme Staff, Viewer); volunteers need a one-time SADeaf code; staff requests need approval (Lovable)
+- 2026-10-14 · guide · Added Volunteer Guide page with scenario cards and quiz; passing unlocks children and sessions (Lovable)
+- 2026-10-14 · child records · Children on Home are clickable; child profile shows level, tricky words, history and last volunteer's note (Lovable)
+- 2026-10-14 · session · Volunteers can start a session, add tricky words and save handover feedback (Lovable)
+- 2026-10-14 · admin · Admin page explains roles, creates volunteer codes, approves staff, adds children and assigns volunteers (Lovable)
+- 2026-10-14 · library · Book pages have an "Open the book" link staff can set; sign links now go to SignASL.org (Lovable)
 - 2026-10-14 · library · Added book library with level/theme/length filters, book pages with key-word pop-ups and CROWD prompts, 15 sample books (Lovable)
 - 2026-10-14 · style guide · Added warm, calm colour scheme and readable fonts (Lexend, Atkinson Hyperlegible) (Lovable)
 - 2026-10-14 · data model · Added database for children, books, word cards, prompts, sessions, guide and safeguarding, with sample data and access rules (Lovable)

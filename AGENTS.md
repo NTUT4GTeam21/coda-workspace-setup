@@ -14,3 +14,4 @@
 - Signed-in pages live under `src/routes/_authenticated/` (client-only gate); public pages stay top-level so they can be server-rendered.
 - Roles live only in `user_roles`; admin-only changes go through security-definer RPCs that check `has_role`, so volunteers can't edit their own role or qualification.
 - Book content (books, word_cards, discussion_prompts) has a draft/approved status; volunteers only see approved rows so AI drafts must be reviewed first.
+- Sign-up role choice is enforced in the `handle_new_user` trigger (volunteer codes validated there, staff stay pending until an admin approves via RPC), so the client can't grant itself a role.
