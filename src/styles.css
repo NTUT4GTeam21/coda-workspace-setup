@@ -192,3 +192,7 @@ h1, h2, h3 { font-family: var(--font-heading); }
   .guide-card { animation: page-appear 180ms ease-out; }
   @keyframes page-appear { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 }
+
+.public-reading-banner img { object-fit: contain; object-position: right center; background: var(--secondary); }
+.public-reading-banner { background: var(--secondary); }
+@media (min-width: 640px) { .public-reading-banner img { width: 77%; left: auto; } }

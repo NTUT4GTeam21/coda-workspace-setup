@@ -86,7 +86,15 @@ function Guide() {
       </header>
       {completed && <div role="status" className="flex flex-wrap items-center gap-2 border-l-4 border-primary bg-secondary p-4 text-secondary-foreground"><CheckCircle2 className="size-5" aria-hidden /> You’ve passed the guide. <Link to="/dashboard" className="font-bold underline">Go to your children</Link></div>}
       <div className="grid items-start gap-7 lg:grid-cols-[220px_minmax(0,1fr)]">
-        <aside className="border-b border-border pb-4 lg:border-b-0 lg:border-r lg:pr-5">
+        <div className="space-y-2 lg:hidden">
+          <label htmlFor="guide-topic" className="text-sm font-semibold">Your reading journey</label>
+          <select id="guide-topic" value={step} onChange={(e) => setStep(Number(e.target.value))} className="min-h-12 w-full rounded-md border bg-card px-3 text-sm">
+            {cards.map((c, i) => <option key={c.id} value={i}>{read.has(c.id) ? "✓ " : ""}{i + 1}. {c.title}</option>)}
+            <option value={cards.length} disabled={!allRead && !completed}>Knowledge check</option>
+          </select>
+          <p className="text-xs text-muted-foreground">{read.size} of {cards.length} cards read · {questions.length} questions</p>
+        </div>
+        <aside className="hidden border-r pr-5 lg:block">
           <p className="mb-3 font-heading text-sm font-semibold">Your reading journey</p>
           <nav aria-label="Guide topics" className="grid gap-1 sm:grid-cols-2 lg:grid-cols-1">
             {cards.map((c, i) => <Button key={c.id} variant="ghost" aria-current={!onQuiz && i === step ? "step" : undefined} onClick={() => { setStep(i); }} className={cn("h-auto min-h-11 justify-start whitespace-normal px-2 py-2 text-left text-xs leading-snug", i === step && "bg-secondary text-secondary-foreground")}><span className={cn("flex size-6 shrink-0 items-center justify-center rounded-full bg-muted font-bold text-muted-foreground", read.has(c.id) && "bg-primary text-primary-foreground")}>{read.has(c.id) ? <Check className="size-3" aria-label="Read" /> : String(i + 1).padStart(2, "0")}</span>{c.title}</Button>)}

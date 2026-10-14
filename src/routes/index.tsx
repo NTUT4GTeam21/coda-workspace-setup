@@ -26,7 +26,7 @@ const steps = [
 function Index() {
   return (
     <div className="min-h-screen bg-background">
-      <section className="reading-banner relative overflow-hidden border-b">
+      <section className="reading-banner public-reading-banner relative overflow-hidden border-b">
         <img src={readingGarden} alt="" width={1536} height={768} className="absolute inset-0 h-full w-full object-cover object-right" />
         <div className="relative mx-auto max-w-5xl px-5 py-12 sm:py-20">
         <p className="font-heading text-sm font-semibold uppercase tracking-widest text-primary">For SADeaf volunteers</p>
