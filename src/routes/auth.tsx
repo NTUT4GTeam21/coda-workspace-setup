@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ROLE_INFO } from "@/lib/auth";
+import readingGarden from "@/assets/reading-garden.jpg";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/auth")({
@@ -74,7 +75,9 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
-      <div className="w-full max-w-md rounded-2xl border bg-card p-6 shadow-sm">
+      <div className="w-full max-w-md overflow-hidden rounded-lg border bg-card shadow-sm">
+        <img src={readingGarden} alt="An open book growing a colourful story garden" width={1536} height={768} className="h-44 w-full object-cover" />
+        <div className="p-6">
         <Link to="/" className="font-heading text-sm font-semibold text-primary">CODA Reading Toolkit</Link>
         {checkEmail ? (
           <div className="mt-4">
@@ -122,15 +125,16 @@ function AuthPage() {
                 {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Sign up"}
               </Button>
             </form>
-            <button
+            <Button variant="link"
               type="button"
               className="mt-4 text-sm font-semibold text-primary underline-offset-4 hover:underline"
               onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
             >
               {mode === "signin" ? "New here? Create an account" : "Already have an account? Sign in"}
-            </button>
+            </Button>
           </>
         )}
+        </div>
       </div>
     </div>
   );

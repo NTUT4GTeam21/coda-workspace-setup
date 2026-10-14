@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe, LEVEL_LABELS } from "@/lib/auth";
+import readingGarden from "@/assets/reading-garden.jpg";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -32,9 +33,13 @@ function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="reading-banner relative overflow-hidden border-b">
+        <img src={readingGarden} alt="" width={1536} height={768} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="relative max-w-sm px-5 py-8 sm:px-7">
+        <p className="mb-2 text-sm font-semibold text-primary">A new chapter starts here</p>
         <h1 className="text-3xl font-bold">Hello{me.fullName ? `, ${me.fullName}` : ""}</h1>
-        <p className="mt-1 text-muted-foreground">{roleLabel}</p>
+        <p className="mt-2 text-muted-foreground">{roleLabel}</p>
+        </div>
       </div>
 
       {me.isViewer && !me.isAdmin ? (

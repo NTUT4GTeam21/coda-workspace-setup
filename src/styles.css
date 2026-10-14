@@ -67,9 +67,9 @@
 }
 
 :root {
-  --radius: 0.875rem;
+  --radius: 0.5rem;
   /* Warm, calm palette: cream paper, deep teal, coral accent */
-  --background: oklch(0.982 0.012 85);
+  --background: oklch(0.987 0.006 170);
   --foreground: oklch(0.27 0.03 230);
   --card: oklch(0.995 0.006 85);
   --card-foreground: oklch(0.27 0.03 230);
@@ -77,9 +77,9 @@
   --popover-foreground: oklch(0.27 0.03 230);
   --primary: oklch(0.47 0.085 195);
   --primary-foreground: oklch(0.985 0.01 85);
-  --secondary: oklch(0.94 0.03 80);
-  --secondary-foreground: oklch(0.3 0.04 60);
-  --muted: oklch(0.95 0.015 85);
+  --secondary: oklch(0.94 0.035 165);
+  --secondary-foreground: oklch(0.3 0.055 185);
+  --muted: oklch(0.956 0.014 180);
   --muted-foreground: oklch(0.47 0.025 230);
   --accent: oklch(0.86 0.08 45);
   --accent-foreground: oklch(0.3 0.06 35);
@@ -152,4 +152,43 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+}
+
+/* Reading identity: mint paper, coral tabs and sunshine highlights. */
+@theme inline {
+  --color-story-sun: var(--story-sun);
+  --color-story-sky: var(--story-sky);
+  --color-story-coral: var(--story-coral);
+  --color-story-ink: var(--story-ink);
+}
+:root {
+  --story-sun: oklch(0.9 0.14 90);
+  --story-sky: oklch(0.9 0.06 235);
+  --story-coral: oklch(0.81 0.1 35);
+  --story-ink: oklch(0.27 0.03 230);
+  --shadow-reading: 0 5px 22px oklch(0.35 0.055 180 / 0.045);
+}
+.dark {
+  --story-sun: oklch(0.58 0.09 90);
+  --story-sky: oklch(0.45 0.06 235);
+  --story-coral: oklch(0.5 0.1 35);
+  --story-ink: oklch(0.27 0.03 230);
+}
+body { letter-spacing: 0; }
+h1, h2, h3 { font-family: var(--font-heading); }
+.reading-banner { color: var(--story-ink); min-height: 210px; }
+.reading-banner h1 { color: var(--story-ink); }
+.reading-banner p { color: var(--story-ink); }
+.guide-card { box-shadow: var(--shadow-reading); border-radius: 0 0 8px 8px; }
+.story-stripe { height: 5px; display: grid; grid-template-columns: 3fr 2fr 2fr 1fr; }
+.story-stripe span:nth-child(1) { background: var(--primary); }
+.story-stripe span:nth-child(2) { background: var(--story-sun); }
+.story-stripe span:nth-child(3) { background: var(--story-coral); }
+.story-stripe span:nth-child(4) { background: var(--story-sky); }
+@media (max-width: 639px) {
+  .reading-banner img { object-position: 26% center; opacity: 0.22; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .guide-card { animation: page-appear 180ms ease-out; }
+  @keyframes page-appear { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 }

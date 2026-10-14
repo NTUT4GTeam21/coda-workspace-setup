@@ -23,8 +23,10 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-20 border-b bg-card/90 backdrop-blur">
+      <div className="story-stripe" aria-hidden><span /><span /><span /><span /></div>
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-2 px-4 py-2">
-        <Link to="/dashboard" className="mr-auto font-heading text-lg font-bold text-primary">
+        <Link to="/dashboard" className="mr-auto flex items-center gap-2 font-heading text-lg font-bold text-primary">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground"><BookOpen className="size-5" aria-hidden /></span>
           CODA Reading Toolkit
         </Link>
         <nav aria-label="Main" className="flex flex-wrap items-center gap-1">
@@ -34,7 +36,7 @@ export function AppHeader() {
           <Link to="/library" className={linkCls} activeProps={{ className: activeCls }}>
             <BookOpen className="h-4 w-4" aria-hidden /> Library
           </Link>
-          {me && !me.isViewer && (
+          {(!me?.isViewer || me?.isAdmin || me?.isVolunteer) && (
             <Link to="/guide" className={linkCls} activeProps={{ className: activeCls }}>
               <GraduationCap className="h-4 w-4" aria-hidden /> Guide
             </Link>
