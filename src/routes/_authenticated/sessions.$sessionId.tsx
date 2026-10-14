@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_authenticated/sessions/$sessionId")({
-  head: () => ({ meta: [{ title: "Session · CODA Reading Toolkit" }, { name: "description", content: "Run a reading session and save notes." }] }),
+  head: () => ({ meta: [{ title: "Session · CODA Reading Toolkit" }, { name: "description", content: "Run a reading session and save notes." }, { property: "og:title", content: "Session · CODA Reading Toolkit" }, { property: "og:description", content: "Run a reading session and save notes." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: SessionPage,
 });
 

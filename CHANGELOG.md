@@ -7,6 +7,9 @@ Format: `- YYYY-MM-DD · <module> · <what changed> (<author or "Lovable">)`
 
 ## Unreleased
 
+- 2026-10-14 · guide · Expanded CODA background and scenario guidance to 12 cards and 12 questions; restored guide permissions before qualification and protected quiz answers (Lovable)
+- 2026-10-14 · style guide · Added colourful storybook artwork, mint surfaces and playful colour accents to welcome pages and volunteer learning (Lovable)
+
 - 2026-10-14 · login · Sign-up now asks for role (Volunteer, Programme Staff, Viewer); volunteers need a one-time SADeaf code; staff requests need approval (Lovable)
 - 2026-10-14 · guide · Added Volunteer Guide page with scenario cards and quiz; passing unlocks children and sessions (Lovable)
 - 2026-10-14 · child records · Children on Home are clickable; child profile shows level, tricky words, history and last volunteer's note (Lovable)

@@ -7,7 +7,7 @@ import readingGarden from "@/assets/reading-garden.jpg";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Home · CODA Reading Toolkit" }, { name: "description", content: "Your children and sessions." }] }),
+  head: () => ({ meta: [{ title: "Home · CODA Reading Toolkit" }, { name: "description", content: "Your children and sessions." }, { property: "og:title", content: "Home · CODA Reading Toolkit" }, { property: "og:description", content: "Your children and sessions." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Dashboard,
 });
 
