@@ -15,3 +15,6 @@
 - Roles live only in `user_roles`; admin-only changes go through security-definer RPCs that check `has_role`, so volunteers can't edit their own role or qualification.
 - Book content (books, word_cards, discussion_prompts) has a draft/approved status; volunteers only see approved rows so AI drafts must be reviewed first.
 - Sign-up role choice is enforced in the `handle_new_user` trigger (volunteer codes validated there, staff stay pending until an admin approves via RPC), so the client can't grant itself a role.
+
+- Guide reads are available to authenticated users before qualification; quiz answers are column-restricted and scoring stays in the database RPC so access can be earned without exposing the answer key.
+- Volunteer learning content stays in editable guide tables; the guide UI checks errors explicitly and preserves quiz choices while users revisit scenario cards.

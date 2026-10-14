@@ -8,7 +8,7 @@ import { LevelBadge } from "@/components/LevelBadge";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/library/")({
-  head: () => ({ meta: [{ title: "Book library · CODA Reading Toolkit" }, { name: "description", content: "Find a book by level, theme and length." }] }),
+  head: () => ({ meta: [{ title: "Book library · CODA Reading Toolkit" }, { name: "description", content: "Find a book by level, theme and length." }, { property: "og:title", content: "Book library · CODA Reading Toolkit" }, { property: "og:description", content: "Find a book by level, theme and length." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Library,
 });
 

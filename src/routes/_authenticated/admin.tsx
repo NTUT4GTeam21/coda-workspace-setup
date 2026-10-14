@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin · CODA Reading Toolkit" }, { name: "description", content: "Manage volunteers, codes and children." }] }),
+  head: () => ({ meta: [{ title: "Admin · CODA Reading Toolkit" }, { name: "description", content: "Manage volunteers, codes and children." }, { property: "og:title", content: "Admin · CODA Reading Toolkit" }, { property: "og:description", content: "Manage volunteers, codes and children." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: Admin,
 });
 

@@ -3,10 +3,20 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe, LEVEL_LABELS } from "@/lib/auth";
+import readingGarden from "@/assets/reading-garden.jpg";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Home · CODA Reading Toolkit" }, { name: "description", content: "Your children and sessions." }] }),
+  head: () => ({
+    meta: [
+      { title: "Home · CODA Reading Toolkit" },
+      { name: "description", content: "Your children and sessions." },
+      { property: "og:title", content: "Home · CODA Reading Toolkit" },
+      { property: "og:description", content: "Your children and sessions." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: Dashboard,
 });
 
@@ -28,19 +38,37 @@ function Dashboard() {
   });
 
   if (isLoading || !me) return <p className="text-muted-foreground">Loading…</p>;
-  const roleLabel = me.isAdmin ? "Programme staff" : me.isViewer ? "Viewer" : me.requestedRole === "staff" ? "Waiting for staff approval" : "Volunteer";
+  const roleLabel = me.isAdmin
+    ? "Programme staff"
+    : me.isViewer
+      ? "Viewer"
+      : me.requestedRole === "staff"
+        ? "Waiting for staff approval"
+        : "Volunteer";
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold">Hello{me.fullName ? `, ${me.fullName}` : ""}</h1>
-        <p className="mt-1 text-muted-foreground">{roleLabel}</p>
+      <div className="reading-banner relative overflow-hidden border-b">
+        <img
+          src={readingGarden}
+          alt=""
+          width={1536}
+          height={768}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="relative max-w-sm px-5 py-8 sm:px-7">
+          <p className="mb-2 text-sm font-semibold text-primary">A new chapter starts here</p>
+          <h1 className="text-3xl font-bold">Hello{me.fullName ? `, ${me.fullName}` : ""}</h1>
+          <p className="mt-2 text-muted-foreground">{roleLabel}</p>
+        </div>
       </div>
 
       {me.isViewer && !me.isAdmin ? (
         <section className="rounded-2xl border bg-secondary p-5 text-secondary-foreground">
           <p>As a viewer you can browse the book library.</p>
-          <Button asChild className="mt-3 min-h-11"><Link to="/library">Open the library</Link></Button>
+          <Button asChild className="mt-3 min-h-11">
+            <Link to="/library">Open the library</Link>
+          </Button>
         </section>
       ) : !me.isAdmin && me.requestedRole === "staff" && !me.isVolunteer ? (
         <section className="rounded-2xl border bg-secondary p-5 text-secondary-foreground">
@@ -51,11 +79,16 @@ function Dashboard() {
           <div className="flex items-start gap-3">
             <Lock className="mt-1 h-5 w-5 text-secondary-foreground" aria-hidden />
             <div>
-              <h2 className="text-lg font-semibold text-secondary-foreground">Finish the guide to unlock sessions</h2>
+              <h2 className="text-lg font-semibold text-secondary-foreground">
+                Finish the guide to unlock sessions
+              </h2>
               <p className="mt-1 text-secondary-foreground/80">
-                Children's records, the book library and sessions open once you read the Volunteer Guide and pass its short quiz.
+                Children's records, the book library and sessions open once you read the Volunteer
+                Guide and pass its short quiz.
               </p>
-              <Button asChild className="mt-3 min-h-11"><Link to="/guide">Start the Volunteer Guide</Link></Button>
+              <Button asChild className="mt-3 min-h-11">
+                <Link to="/guide">Start the Volunteer Guide</Link>
+              </Button>
             </div>
           </div>
         </section>
@@ -64,15 +97,25 @@ function Dashboard() {
           <section>
             <h2 className="text-xl font-semibold">{me.isAdmin ? "All children" : "My children"}</h2>
             {children && children.length === 0 && (
-              <p className="mt-2 text-muted-foreground">{me.isAdmin ? "No children yet. Add them on the Admin page." : "No children assigned to you yet."}</p>
+              <p className="mt-2 text-muted-foreground">
+                {me.isAdmin
+                  ? "No children yet. Add them on the Admin page."
+                  : "No children assigned to you yet."}
+              </p>
             )}
             <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {children?.map((c) => (
                 <li key={c.id}>
-                  <Link to="/children/$childId" params={{ childId: c.id }} className="flex items-center rounded-2xl border bg-card p-4 hover:border-primary">
+                  <Link
+                    to="/children/$childId"
+                    params={{ childId: c.id }}
+                    className="flex items-center rounded-2xl border bg-card p-4 hover:border-primary"
+                  >
                     <div className="flex-1">
                       <p className="font-heading text-lg font-semibold">{c.nickname}</p>
-                      <p className="text-sm text-muted-foreground">Age {c.age_band} · {LEVEL_LABELS[c.current_level]}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Age {c.age_band} · {LEVEL_LABELS[c.current_level]}
+                      </p>
                     </div>
                     <ChevronRight className="h-5 w-5 text-muted-foreground" aria-hidden />
                   </Link>
