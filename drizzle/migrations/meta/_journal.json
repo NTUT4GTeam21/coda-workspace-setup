@@ -15,6 +15,13 @@
       "when": 1791983817022,
       "tag": "0001_roles_codes_guide",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791984940105,
+      "tag": "0002_restore_guide_access",
+      "breakpoints": true
     }
   ]
 }
