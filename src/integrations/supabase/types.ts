@@ -14,16 +14,587 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      books: {
+        Row: {
+          author: string
+          cover_url: string | null
+          created_at: string
+          id: string
+          level: number
+          link_url: string | null
+          reading_time: number
+          status: Database["public"]["Enums"]["content_status"]
+          summary: string
+          tags: string[]
+          title: string
+        }
+        Insert: {
+          author?: string
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          level: number
+          link_url?: string | null
+          reading_time?: number
+          status?: Database["public"]["Enums"]["content_status"]
+          summary?: string
+          tags?: string[]
+          title: string
+        }
+        Update: {
+          author?: string
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          level?: number
+          link_url?: string | null
+          reading_time?: number
+          status?: Database["public"]["Enums"]["content_status"]
+          summary?: string
+          tags?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
+      child_assignments: {
+        Row: {
+          child_id: string
+          volunteer_id: string
+        }
+        Insert: {
+          child_id: string
+          volunteer_id: string
+        }
+        Update: {
+          child_id?: string
+          volunteer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_assignments_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_assignments_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      children: {
+        Row: {
+          age_band: string
+          archived: boolean
+          communication_notes: string
+          created_at: string
+          current_level: number
+          id: string
+          nickname: string
+        }
+        Insert: {
+          age_band: string
+          archived?: boolean
+          communication_notes?: string
+          created_at?: string
+          current_level?: number
+          id?: string
+          nickname: string
+        }
+        Update: {
+          age_band?: string
+          archived?: boolean
+          communication_notes?: string
+          created_at?: string
+          current_level?: number
+          id?: string
+          nickname?: string
+        }
+        Relationships: []
+      }
+      discussion_prompts: {
+        Row: {
+          book_id: string
+          crowd_type: string
+          id: string
+          prompt_text: string
+          status: Database["public"]["Enums"]["content_status"]
+          story_point: string
+        }
+        Insert: {
+          book_id: string
+          crowd_type: string
+          id?: string
+          prompt_text: string
+          status?: Database["public"]["Enums"]["content_status"]
+          story_point?: string
+        }
+        Update: {
+          book_id?: string
+          crowd_type?: string
+          id?: string
+          prompt_text?: string
+          status?: Database["public"]["Enums"]["content_status"]
+          story_point?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_prompts_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guide_cards: {
+        Row: {
+          avoid_tip: string
+          id: string
+          sort_order: number
+          steps: string[]
+          title: string
+        }
+        Insert: {
+          avoid_tip?: string
+          id?: string
+          sort_order?: number
+          steps?: string[]
+          title: string
+        }
+        Update: {
+          avoid_tip?: string
+          id?: string
+          sort_order?: number
+          steps?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
+      guide_quiz_questions: {
+        Row: {
+          correct_index: number
+          guide_card_id: string | null
+          id: string
+          options: string[]
+          question: string
+          sort_order: number
+        }
+        Insert: {
+          correct_index: number
+          guide_card_id?: string | null
+          id?: string
+          options: string[]
+          question: string
+          sort_order?: number
+        }
+        Update: {
+          correct_index?: number
+          guide_card_id?: string | null
+          id?: string
+          options?: string[]
+          question?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guide_quiz_questions_guide_card_id_fkey"
+            columns: ["guide_card_id"]
+            isOneToOne: false
+            referencedRelation: "guide_cards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      handover_feedback: {
+        Row: {
+          confidence: number
+          created_at: string
+          engagement: number
+          finished_book: string
+          id: string
+          level_fit: string
+          notes: string
+          session_id: string
+          try_next: string
+          worked_well: string
+        }
+        Insert: {
+          confidence: number
+          created_at?: string
+          engagement: number
+          finished_book: string
+          id?: string
+          level_fit: string
+          notes?: string
+          session_id: string
+          try_next?: string
+          worked_well?: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          engagement?: number
+          finished_book?: string
+          id?: string
+          level_fit?: string
+          notes?: string
+          session_id?: string
+          try_next?: string
+          worked_well?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "handover_feedback_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          guide_progress: number
+          id: string
+          last_login_at: string | null
+          qualified: boolean
+          quiz_passed_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string
+          guide_progress?: number
+          id: string
+          last_login_at?: string | null
+          qualified?: boolean
+          quiz_passed_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          guide_progress?: number
+          id?: string
+          last_login_at?: string | null
+          qualified?: boolean
+          quiz_passed_at?: string | null
+        }
+        Relationships: []
+      }
+      quiz_results: {
+        Row: {
+          child_answer: string
+          correct_answer: string
+          created_at: string
+          id: string
+          question: string
+          session_id: string
+          word: string | null
+        }
+        Insert: {
+          child_answer: string
+          correct_answer: string
+          created_at?: string
+          id?: string
+          question: string
+          session_id: string
+          word?: string | null
+        }
+        Update: {
+          child_answer?: string
+          correct_answer?: string
+          created_at?: string
+          id?: string
+          question?: string
+          session_id?: string
+          word?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_results_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      safeguarding_reports: {
+        Row: {
+          child_id: string | null
+          created_at: string
+          details: string
+          id: string
+          reporter_id: string
+        }
+        Insert: {
+          child_id?: string | null
+          created_at?: string
+          details: string
+          id?: string
+          reporter_id?: string
+        }
+        Update: {
+          child_id?: string | null
+          created_at?: string
+          details?: string
+          id?: string
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safeguarding_reports_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safeguarding_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      session_templates: {
+        Row: {
+          blocks: Json
+          created_at: string
+          id: string
+          name: string
+          owner_id: string | null
+          total_minutes: number
+        }
+        Insert: {
+          blocks?: Json
+          created_at?: string
+          id?: string
+          name: string
+          owner_id?: string | null
+          total_minutes: number
+        }
+        Update: {
+          blocks?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string | null
+          total_minutes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_templates_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          book_id: string | null
+          child_id: string
+          created_at: string
+          id: string
+          scheduled_at: string
+          status: string
+          template_id: string | null
+          volunteer_id: string
+        }
+        Insert: {
+          book_id?: string | null
+          child_id: string
+          created_at?: string
+          id?: string
+          scheduled_at?: string
+          status?: string
+          template_id?: string | null
+          volunteer_id: string
+        }
+        Update: {
+          book_id?: string | null
+          child_id?: string
+          created_at?: string
+          id?: string
+          scheduled_at?: string
+          status?: string
+          template_id?: string | null
+          volunteer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "session_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sessions_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tricky_words: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+          mastered: boolean
+          session_id: string | null
+          word: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+          mastered?: boolean
+          session_id?: string | null
+          word: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+          mastered?: boolean
+          session_id?: string | null
+          word?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tricky_words_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tricky_words_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      word_cards: {
+        Row: {
+          book_id: string
+          definition: string
+          example_sentence: string
+          id: string
+          image_url: string | null
+          pronunciation: string
+          sign_bank_url: string | null
+          sort_order: number
+          status: Database["public"]["Enums"]["content_status"]
+          word: string
+        }
+        Insert: {
+          book_id: string
+          definition: string
+          example_sentence?: string
+          id?: string
+          image_url?: string | null
+          pronunciation?: string
+          sign_bank_url?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["content_status"]
+          word: string
+        }
+        Update: {
+          book_id?: string
+          definition?: string
+          example_sentence?: string
+          id?: string
+          image_url?: string | null
+          pronunciation?: string
+          sign_bank_url?: string | null
+          sort_order?: number
+          status?: Database["public"]["Enums"]["content_status"]
+          word?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "word_cards_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_access_child: { Args: { _child_id: string }; Returns: boolean }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_qualified: { Args: { _user_id: string }; Returns: boolean }
+      set_admin_role: {
+        Args: { _is_admin: boolean; _user_id: string }
+        Returns: undefined
+      }
+      set_volunteer_qualified: {
+        Args: { _qualified: boolean; _user_id: string }
+        Returns: undefined
+      }
+      touch_last_login: { Args: never; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "volunteer"
+      content_status: "draft" | "approved"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +721,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "volunteer"],
+      content_status: ["draft", "approved"],
+    },
   },
 } as const
