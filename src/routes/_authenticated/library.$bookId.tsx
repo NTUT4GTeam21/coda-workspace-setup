@@ -3,6 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ArrowLeft, ExternalLink, Volume2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useMe } from "@/lib/auth";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { LevelBadge } from "@/components/LevelBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -33,6 +37,9 @@ function speak(text: string) {
 function BookDetail() {
   const { bookId } = Route.useParams();
   const [openIdx, setOpenIdx] = useState<number | null>(null);
+  const { data: me } = useMe();
+  const qc = useQueryClient();
+  const [link, setLink] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["book", bookId],
@@ -61,6 +68,23 @@ function BookDetail() {
         <h1 className="mt-3 text-3xl font-bold">{book.title}</h1>
         <p className="mt-2 text-lg text-muted-foreground">{book.summary}</p>
         <p className="mt-2 text-sm text-muted-foreground">{book.author} · {book.reading_time} min · {book.tags.join(", ")}</p>
+        {book.link_url ? (
+          <Button asChild className="mt-4 min-h-12"><a href={book.link_url} target="_blank" rel="noreferrer">Open the book <ExternalLink className="h-4 w-4" aria-hidden /></a></Button>
+        ) : (
+          <p className="mt-4 text-sm text-muted-foreground">No link to the book yet.</p>
+        )}
+        {me?.isAdmin && (
+          <form className="mt-3 flex gap-2" onSubmit={async (e) => {
+            e.preventDefault();
+            const { error } = await supabase.from("books").update({ link_url: link || null }).eq("id", bookId);
+            if (error) return toast.error(error.message);
+            toast.success("Book link saved");
+            qc.invalidateQueries({ queryKey: ["book", bookId] });
+          }}>
+            <Input aria-label="Link to the book" type="url" placeholder="Paste a link to the book (library, publisher, e-book)" value={link} onChange={(e) => setLink(e.target.value)} className="min-h-11" />
+            <Button type="submit" variant="outline" className="min-h-11">Save link</Button>
+          </form>
+        )}
       </header>
 
       <section>
@@ -109,7 +133,7 @@ function BookDetail() {
               <p className="rounded-2xl bg-muted p-4 text-lg italic">"{card.example_sentence}"</p>
               {card.sign_bank_url && (
                 <a href={card.sign_bank_url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 font-semibold text-primary underline-offset-4 hover:underline">
-                  See the sign in the ASL Sign Bank <ExternalLink className="h-4 w-4" aria-hidden />
+                  See the sign on SignASL.org <ExternalLink className="h-4 w-4" aria-hidden />
                 </a>
               )}
               <div className="flex justify-between gap-2">
