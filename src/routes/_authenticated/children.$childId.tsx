@@ -101,7 +101,7 @@ function ChildPage() {
               <li key={s.id}>
                 <Link to="/sessions/$sessionId" params={{ sessionId: s.id }} className="block rounded-xl border bg-card p-4 hover:border-primary">
                   <p className="font-semibold">{new Date(s.scheduled_at).toLocaleDateString()} · {s.books?.title ?? "No book"}</p>
-                  <p className="text-sm text-muted-foreground">{s.status === "done" ? "Finished" : "In progress"}{hfList(s.handover_feedback)[0]?.worked_well ? ` · ${hfList(s.handover_feedback)[0].worked_well}` : ""}</p>
+                  <p className="text-sm text-muted-foreground">{s.status === "done" ? "Finished" : "In progress"}{hfList(s.handover_feedback)[0]?.worked_well ? ` · ${hfList(s.handover_feedback)[0]?.worked_well}` : ""}</p>
                 </Link>
               </li>
             ))}
