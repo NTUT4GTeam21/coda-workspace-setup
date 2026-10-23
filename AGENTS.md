@@ -20,3 +20,4 @@
 - Volunteer learning content stays in editable guide tables; the guide UI checks errors explicitly and preserves quiz choices while users revisit scenario cards.
 - Original stories live in book_stories with database-enforced draft/approved visibility; the shared reader is used in book pages and sessions so staff review and child reading stay consistent.
 - Quiz feedback comes from a security-definer scoring RPC returning incorrect question IDs, never the answer key; the legacy boolean RPC remains for deployed clients.
+- Session completion uses the database's completed status through shared status helpers; handover retries use the session's unique feedback row to avoid duplicates.

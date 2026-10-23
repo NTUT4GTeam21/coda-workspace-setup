@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StoryReader } from "@/components/StoryReader";
+import { COMPLETED_SESSION_STATUS, sessionStatusLabel } from "@/lib/session-status";
 
 export const Route = createFileRoute("/_authenticated/sessions/$sessionId")({
   head: () => ({ meta: [{ title: "Session · Read between the Signs" }, { name: "description", content: "Run a reading session and save notes." }, { property: "og:title", content: "Session · Read between the Signs" }, { property: "og:description", content: "Run a reading session and save notes." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -51,10 +52,11 @@ function SessionPage() {
   async function finish(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.from("handover_feedback").insert({ session_id: sessionId, ...fb });
-    if (!error) await supabase.from("sessions").update({ status: "done" }).eq("id", sessionId);
+    const { error } = await supabase.from("handover_feedback").upsert({ session_id: sessionId, ...fb }, { onConflict: "session_id" });
+    if (error) { setBusy(false); toast.error(error.message); return; }
+    const { error: statusError } = await supabase.from("sessions").update({ status: COMPLETED_SESSION_STATUS }).eq("id", sessionId);
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (statusError) { toast.error("Notes saved, but the session could not finish. Please try again."); return; }
     toast.success("Session saved for the next volunteer.");
     qc.invalidateQueries();
   }
@@ -64,8 +66,8 @@ function SessionPage() {
       <legend className="text-sm font-semibold">{label} (1–5)</legend>
       <div className="mt-1 flex gap-2">
         {[1, 2, 3, 4, 5].map((n) => (
-          <button type="button" key={n} aria-pressed={fb[k] === n} onClick={() => setFb({ ...fb, [k]: n })}
-            className={`h-11 w-11 rounded-lg border font-semibold ${fb[k] === n ? "border-primary bg-primary text-primary-foreground" : "bg-card"}`}>{n}</button>
+          <Button variant={fb[k] === n ? "default" : "outline"} type="button" key={n} aria-pressed={fb[k] === n} onClick={() => setFb({ ...fb, [k]: n })}
+            className="h-11 w-11 rounded-lg border font-semibold">{n}</Button>
         ))}
       </div>
     </fieldset>
@@ -78,7 +80,7 @@ function SessionPage() {
       </Link>
       <header>
         <h1 className="text-3xl font-bold">Session with {s.children?.nickname}</h1>
-        <p className="mt-1 text-muted-foreground">{new Date(s.scheduled_at).toLocaleString()} · {s.status === "done" ? "Finished" : "In progress"}</p>
+        <p className="mt-1 text-muted-foreground">{new Date(s.scheduled_at).toLocaleString()} · {sessionStatusLabel(s.status)}</p>
         {s.books && (
           <p className="mt-2">Book: <Link to="/library/$bookId" params={{ bookId: s.books.id }} className="font-semibold text-primary underline">{s.books.title}</Link> (key words & prompts)</p>
         )}
@@ -95,7 +97,7 @@ function SessionPage() {
         <ul className="mt-3 flex flex-wrap gap-2">{words.map((w) => <li key={w.id} className="rounded-full border bg-muted px-3 py-1">{w.word}</li>)}</ul>
       </section>
 
-      {hf ? (
+      {hf && s.status === COMPLETED_SESSION_STATUS ? (
         <section className="rounded-2xl border bg-secondary p-5 text-secondary-foreground">
           <h2 className="text-xl font-semibold">Saved notes</h2>
           <p className="mt-2">Engagement {hf.engagement}/5 · Confidence {hf.confidence}/5 · Level: {hf.level_fit} · Finished book: {hf.finished_book}</p>
