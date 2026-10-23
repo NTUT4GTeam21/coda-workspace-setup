@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { StoryReader } from "@/components/StoryReader";
 
 export const Route = createFileRoute("/_authenticated/sessions/$sessionId")({
-  head: () => ({ meta: [{ title: "Session · CODA Reading Toolkit" }, { name: "description", content: "Run a reading session and save notes." }, { property: "og:title", content: "Session · CODA Reading Toolkit" }, { property: "og:description", content: "Run a reading session and save notes." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Session · Read between the Signs" }, { name: "description", content: "Run a reading session and save notes." }, { property: "og:title", content: "Session · Read between the Signs" }, { property: "og:description", content: "Run a reading session and save notes." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: SessionPage,
 });
 

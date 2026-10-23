@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { StoryReader } from "@/components/StoryReader";
 
 export const Route = createFileRoute("/_authenticated/library/$bookId")({
-  head: () => ({ meta: [{ title: "Book · CODA Reading Toolkit" }, { name: "description", content: "Key words and discussion prompts for this book." }, { property: "og:title", content: "Book · CODA Reading Toolkit" }, { property: "og:description", content: "Key words and discussion prompts for this book." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Book · Read between the Signs" }, { name: "description", content: "Key words and discussion prompts for this book." }, { property: "og:title", content: "Book · Read between the Signs" }, { property: "og:description", content: "Key words and discussion prompts for this book." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: BookDetail,
 });
 

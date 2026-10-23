@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_authenticated/children/$childId")({
-  head: () => ({ meta: [{ title: "Child profile · CODA Reading Toolkit" }, { name: "description", content: "Level, tricky words and session history." }, { property: "og:title", content: "Child profile · CODA Reading Toolkit" }, { property: "og:description", content: "Level, tricky words and session history." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({ meta: [{ title: "Child profile · Read between the Signs" }, { name: "description", content: "Level, tricky words and session history." }, { property: "og:title", content: "Child profile · Read between the Signs" }, { property: "og:description", content: "Level, tricky words and session history." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: ChildPage,
 });
 

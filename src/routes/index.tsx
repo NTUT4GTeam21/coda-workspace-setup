@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CODA Reading Toolkit · SADeaf volunteers" },
+      { title: "Read between the Signs · SADeaf volunteers" },
       {
         name: "description",
         content:
           "A ready-to-use toolkit for SADeaf volunteers running 1-to-1 reading sessions with children of Deaf adults.",
       },
-      { property: "og:title", content: "CODA Reading Toolkit" },
+      { property: "og:title", content: "Read between the Signs" },
       {
         property: "og:description",
         content:

@@ -12,9 +12,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in · CODA Reading Toolkit" },
-      { name: "description", content: "Sign in to the CODA Reading Toolkit." },
-      { property: "og:title", content: "Sign in · CODA Reading Toolkit" },
+      { title: "Sign in · Read between the Signs" },
+      { name: "description", content: "Sign in to the Read between the Signs." },
+      { property: "og:title", content: "Sign in · Read between the Signs" },
       { property: "og:description", content: "Volunteer, programme staff and viewer sign-in." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -92,7 +92,7 @@ function AuthPage() {
         />
         <div className="p-6">
           <Link to="/" className="font-heading text-sm font-semibold text-primary">
-            CODA Reading Toolkit
+            Read between the Signs
           </Link>
           {checkEmail ? (
             <div className="mt-4">

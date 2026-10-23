@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Home · CODA Reading Toolkit" },
+      { title: "Home · Read between the Signs" },
       { name: "description", content: "Your children and sessions." },
-      { property: "og:title", content: "Home · CODA Reading Toolkit" },
+      { property: "og:title", content: "Home · Read between the Signs" },
       { property: "og:description", content: "Your children and sessions." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -21,13 +21,13 @@ import { parseQuizFeedback, type QuizFeedback } from "@/lib/quiz-feedback";
 export const Route = createFileRoute("/_authenticated/guide")({
   head: () => ({
     meta: [
-      { title: "Volunteer Guide · CODA Reading Toolkit" },
+      { title: "Volunteer Guide · Read between the Signs" },
       {
         name: "description",
         content:
           "Understand CODA identities, practise reading scenarios and complete your volunteer knowledge check.",
       },
-      { property: "og:title", content: "Volunteer Guide · CODA Reading Toolkit" },
+      { property: "og:title", content: "Volunteer Guide · Read between the Signs" },
       {
         property: "og:description",
         content:
