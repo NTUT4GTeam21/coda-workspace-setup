@@ -100,7 +100,7 @@ function Dashboard() {
               <p className="mt-2 text-muted-foreground">
                 {me.isAdmin
                   ? "No children yet. Add them on the Admin page."
-                  : "No children assigned to you yet."}
+                  : "No children assigned yet. Programme staff register children and assign volunteers after checking consent. Ask your coordinator to assign your reading partner; you can explore the library meanwhile."}
               </p>
             )}
             <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

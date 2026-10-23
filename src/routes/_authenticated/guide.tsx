@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -16,6 +16,7 @@ import { useMe } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import readingGarden from "@/assets/reading-garden.jpg";
+import { parseQuizFeedback, type QuizFeedback } from "@/lib/quiz-feedback";
 
 export const Route = createFileRoute("/_authenticated/guide")({
   head: () => ({
@@ -46,7 +47,9 @@ function Guide() {
   const [read, setRead] = useState<Set<string>>(new Set());
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [feedback, setFeedback] = useState<QuizFeedback | null>(null);
+  const [submitMessage, setSubmitMessage] = useState("");
+  const resultRef = useRef<HTMLDivElement>(null);
   const [passed, setPassed] = useState(false);
   const { data, error, refetch } = useQuery({
     queryKey: ["guide"],
@@ -98,22 +101,29 @@ function Guide() {
     if (busy || !allRead || answered !== questions.length) return;
     setBusy(true);
     try {
-      const { data: result, error: submitError } = await supabase.rpc("submit_guide_quiz", {
+      setSubmitMessage("");
+      const { data: rawResult, error: submitError } = await supabase.rpc("submit_guide_quiz_feedback", {
         _answers: questions.map((_, i) => answers[i] ?? -1),
       });
       if (submitError) throw submitError;
-      setFailed(!result);
-      if (result) {
+      const result = parseQuizFeedback(rawResult);
+      setFeedback(result);
+      if (result.passed) {
         setPassed(true);
         await qc.invalidateQueries();
         toast.success("You passed! Children and sessions are now unlocked.");
       }
     } catch {
+      setSubmitMessage("Your quiz could not be submitted. Your answers are still here; please try again.");
       toast.error(
         "Your quiz could not be submitted. Your answers are still here; please try again.",
       );
     } finally {
       setBusy(false);
+      requestAnimationFrame(() => {
+        resultRef.current?.focus();
+        resultRef.current?.scrollIntoView({ block: "center", behavior: "instant" });
+      });
     }
   }
 
@@ -287,17 +297,12 @@ function Guide() {
                   Read and finish each guide card before submitting.
                 </p>
               )}
-              {failed && (
-                <p role="alert" className="border-l-4 border-accent bg-secondary p-4">
-                  Not quite yet. Revisit the related cards, check your answers and try again. Your
-                  choices are saved while you review.
-                </p>
-              )}
               {questions.map((q, i) => (
-                <fieldset key={q.id} className="rounded-lg border bg-card p-4 sm:p-5">
+                <fieldset id={`question-${q.id}`} key={q.id} className={cn("scroll-mt-40 rounded-lg border bg-card p-4 sm:p-5", feedback?.incorrect_question_ids.includes(q.id) && "border-destructive")}>
                   <legend className="px-1 font-heading text-sm font-semibold">
                     {i + 1}. {q.question}
                   </legend>
+                  {feedback?.incorrect_question_ids.includes(q.id) && <p className="mb-2 text-sm font-semibold text-destructive">Incorrect in your last attempt — review this question.</p>}
                   <div className="space-y-2">
                     {q.options.map((o, j) => (
                       <label
@@ -346,6 +351,29 @@ function Guide() {
                   Volunteer access is needed to submit this knowledge check.
                 </p>
               )}
+              <div ref={resultRef} tabIndex={-1} className="focus:outline-none" aria-live="polite">
+                {submitMessage && <p role="alert" className="border-l-4 border-destructive p-4">{submitMessage}</p>}
+                {feedback && (
+                  <div className={cn("space-y-3 border-l-4 p-5", feedback.passed ? "border-primary bg-secondary" : "border-destructive bg-muted")}>
+                    <h3 className="text-xl font-bold">{feedback.passed ? "You passed! You’re ready to read." : "Not passed yet — let’s try again."}</h3>
+                    <p>{feedback.total - feedback.incorrect_question_ids.length} of {feedback.total} correct.{feedback.passed ? " Your volunteer access is unlocked." : " All questions must be correct to pass. Your choices are kept while you review."}</p>
+                    {feedback.passed ? (
+                      <div className="flex flex-wrap gap-2">
+                        <Button asChild className="min-h-11"><Link to="/dashboard">Go to my children <ArrowRight aria-hidden /></Link></Button>
+                        <Button asChild variant="outline" className="min-h-11"><Link to="/library">Explore the library <BookOpen aria-hidden /></Link></Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {questions.filter((q) => feedback.incorrect_question_ids.includes(q.id)).map((q) => (
+                          <Button key={q.id} variant="outline" className="min-h-11" onClick={() => document.getElementById(`question-${q.id}`)?.scrollIntoView({ block: "center", behavior: "instant" })}>
+                            Review question {questions.findIndex((item) => item.id === q.id) + 1}
+                          </Button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </section>
           )}
           <footer className="border-t pt-4 text-xs leading-relaxed text-muted-foreground">
