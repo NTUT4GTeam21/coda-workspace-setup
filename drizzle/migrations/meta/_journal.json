@@ -22,6 +22,13 @@
       "when": 1791984940105,
       "tag": "0002_restore_guide_access",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792739959030,
+      "tag": "0003_story_review_and_quiz_feedback",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      book_stories: {
+        Row: {
+          book_id: string
+          pages: string[]
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          book_id: string
+          pages?: string[]
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          book_id?: string
+          pages?: string[]
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_stories_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: true
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       books: {
         Row: {
           author: string
@@ -634,6 +666,10 @@ export type Database = {
         Returns: undefined
       }
       submit_guide_quiz: { Args: { _answers: number[] }; Returns: boolean }
+      submit_guide_quiz_feedback: {
+        Args: { _answers: number[] }
+        Returns: Json
+      }
       touch_last_login: { Args: never; Returns: undefined }
     }
     Enums: {
