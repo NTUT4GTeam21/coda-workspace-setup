@@ -9,9 +9,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
-      { title: "Home · CODA Reading Toolkit" },
+      { title: "Home · Read between the Signs" },
       { name: "description", content: "Your children and sessions." },
-      { property: "og:title", content: "Home · CODA Reading Toolkit" },
+      { property: "og:title", content: "Home · Read between the Signs" },
       { property: "og:description", content: "Your children and sessions." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -100,7 +100,7 @@ function Dashboard() {
               <p className="mt-2 text-muted-foreground">
                 {me.isAdmin
                   ? "No children yet. Add them on the Admin page."
-                  : "No children assigned to you yet."}
+                  : "No children assigned yet. Programme staff register children and assign volunteers after checking consent. Ask your coordinator to assign your reading partner; you can explore the library meanwhile."}
               </p>
             )}
             <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

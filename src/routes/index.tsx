@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "CODA Reading Toolkit · SADeaf volunteers" },
+      { title: "Read between the Signs · SADeaf volunteers" },
       {
         name: "description",
         content:
           "A ready-to-use toolkit for SADeaf volunteers running 1-to-1 reading sessions with children of Deaf adults.",
       },
-      { property: "og:title", content: "CODA Reading Toolkit" },
+      { property: "og:title", content: "Read between the Signs" },
       {
         property: "og:description",
         content:
@@ -59,9 +59,9 @@ function Index() {
             For SADeaf volunteers
           </p>
           <h1 className="mt-3 text-4xl font-bold leading-tight text-foreground sm:text-5xl">
-            CODA
+            Read between
             <br />
-            Reading Toolkit
+            the Signs
           </h1>
           <p className="mt-5 max-w-sm text-lg text-muted-foreground">
             Everything you need to prepare and run a 1-to-1 reading session with a child of Deaf

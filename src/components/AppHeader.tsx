@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, GraduationCap, Home, LogOut, Shield } from "lucide-react";
+import { BookOpen, GraduationCap, Home, LogOut, Shield, UserRound } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useMe } from "@/lib/auth";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const linkCls =
   "inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground";
@@ -37,7 +38,7 @@ export function AppHeader() {
           <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <BookOpen className="size-5" aria-hidden />
           </span>
-          CODA Reading Toolkit
+          <span className="max-w-60 leading-snug">Read between the Signs</span>
         </Link>
         <nav aria-label="Main" className="flex flex-wrap items-center gap-1">
           <Link to="/dashboard" className={linkCls} activeProps={{ className: activeCls }}>
@@ -56,6 +57,16 @@ export function AppHeader() {
               <Shield className="h-4 w-4" aria-hidden /> Admin
             </Link>
           )}
+          {me && <Popover>
+            <PopoverTrigger asChild><Button variant="outline" className="min-h-11 max-w-44" aria-label="Your profile"><UserRound aria-hidden /><span className="truncate">{me.fullName || "My profile"}</span></Button></PopoverTrigger>
+            <PopoverContent align="end" className="space-y-2">
+              <p className="font-heading font-semibold">{me.fullName || "Your profile"}</p>
+              <p className="break-words text-sm text-muted-foreground">{me.email}</p>
+              <p className="text-sm font-semibold">{me.isAdmin ? "Programme staff" : me.isViewer ? "Viewer" : me.isVolunteer ? "Volunteer" : "Staff approval pending"}</p>
+              {me.isVolunteer && <p className="text-sm">{me.qualified ? "Qualified · Ready for sessions" : "Guide not passed yet"}</p>}
+              {me.isVolunteer && !me.qualified && <Button asChild variant="secondary"><Link to="/guide">Continue the guide</Link></Button>}
+            </PopoverContent>
+          </Popover>}
           <Button variant="ghost" className="min-h-11" onClick={signOut}>
             <LogOut className="h-4 w-4" aria-hidden /> Sign out
           </Button>

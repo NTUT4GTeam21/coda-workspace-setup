@@ -7,6 +7,10 @@ Format: `- YYYY-MM-DD · <module> · <what changed> (<author or "Lovable">)`
 
 ## Unreleased
 
+- 2026-10-23 · session · Corrected session completion and history labels, with retry support when notes save but completion fails (Lovable)
+- 2026-10-23 · guide · Added immediate pass/retry results, incorrect-question feedback, onward buttons and practical distress steps (Lovable)
+- 2026-10-23 · library and session · Added 15 original AI story drafts, staff editing and approval, and a colourful reading view with Bao artwork (Lovable)
+- 2026-10-23 · style guide · Renamed the app Read between the Signs and added a header profile indicator (Lovable)
 - 2026-10-14 · guide · Expanded CODA background and scenario guidance to 12 cards and 12 questions; restored guide permissions before qualification and protected quiz answers (Lovable)
 - 2026-10-14 · style guide · Added colourful storybook artwork, mint surfaces and playful colour accents to welcome pages and volunteer learning (Lovable)
 
