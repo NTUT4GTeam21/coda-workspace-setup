@@ -20,7 +20,7 @@ function SessionPage() {
   const { sessionId } = Route.useParams();
   const qc = useQueryClient();
   const [word, setWord] = useState("");
-  const [fb, setFb] = useState({ engagement: 3, confidence: 3, level_fit: "right", finished_book: "yes", worked_well: "", try_next: "", notes: "" });
+  const [fb, setFb] = useState({ engagement: 3, confidence: 3, level_fit: "about_right", finished_book: "yes", worked_well: "", try_next: "", notes: "" });
   const [busy, setBusy] = useState(false);
 
   const key = ["session", sessionId];
@@ -114,7 +114,7 @@ function SessionPage() {
             <div className="space-y-1.5">
               <Label htmlFor="fit">Was the level right?</Label>
               <select id="fit" value={fb.level_fit} onChange={(e) => setFb({ ...fb, level_fit: e.target.value })} className="min-h-11 w-full rounded-md border bg-background px-3">
-                <option value="too_easy">Too easy</option><option value="right">About right</option><option value="too_hard">Too hard</option>
+                <option value="too_easy">Too easy</option><option value="about_right">About right</option><option value="too_hard">Too hard</option>
               </select>
             </div>
             <div className="space-y-1.5">

@@ -47,7 +47,8 @@ _Update when folders or key files are added, moved or removed._
                 StoryReader: shared reading view and staff draft review
   /assets       generated reading-garden and Bao illustrations
   /routes       one file per page (index, auth, _authenticated/dashboard, library, admin, guide, children.$childId, sessions.$sessionId)
-  /lib          shared helpers (auth.ts: current user + level labels)
+  /lib          shared helpers (auth.ts: current user + level labels; quiz-feedback.ts; session-status.ts)
+  /test         routing, quiz feedback and session status checks
   /integrations backend connection (auto-generated, do not edit)
 ```
 
