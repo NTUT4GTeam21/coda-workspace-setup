@@ -10,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { LevelBadge } from "@/components/LevelBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { StoryReader } from "@/components/StoryReader";
 
 export const Route = createFileRoute("/_authenticated/library/$bookId")({
   head: () => ({ meta: [{ title: "Book · CODA Reading Toolkit" }, { name: "description", content: "Key words and discussion prompts for this book." }, { property: "og:title", content: "Book · CODA Reading Toolkit" }, { property: "og:description", content: "Key words and discussion prompts for this book." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -68,11 +69,6 @@ function BookDetail() {
         <h1 className="mt-3 text-3xl font-bold">{book.title}</h1>
         <p className="mt-2 text-lg text-muted-foreground">{book.summary}</p>
         <p className="mt-2 text-sm text-muted-foreground">{book.author} · {book.reading_time} min · {book.tags.join(", ")}</p>
-        {book.link_url ? (
-          <Button asChild className="mt-4 min-h-12"><a href={book.link_url} target="_blank" rel="noreferrer">Open the book <ExternalLink className="h-4 w-4" aria-hidden /></a></Button>
-        ) : (
-          <p className="mt-4 text-sm text-muted-foreground">No link to the book yet.</p>
-        )}
         {me?.isAdmin && (
           <form className="mt-3 flex gap-2" onSubmit={async (e) => {
             e.preventDefault();
@@ -87,15 +83,17 @@ function BookDetail() {
         )}
       </header>
 
+      <StoryReader bookId={bookId} title={book.title} externalUrl={book.link_url} />
+
       <section>
         <h2 className="text-xl font-semibold">Key words</h2>
         <p className="text-sm text-muted-foreground">Tap a word to open its card and go through it with the child.</p>
         <ul className="mt-3 flex flex-wrap gap-3">
           {words.map((w, i) => (
             <li key={w.id}>
-              <button onClick={() => setOpenIdx(i)} className="min-h-14 rounded-2xl border-2 bg-card px-5 font-heading text-lg font-semibold hover:border-primary">
+              <Button variant="outline" onClick={() => setOpenIdx(i)} className="min-h-14 rounded-lg border-2 bg-story-sun px-5 font-heading text-lg font-semibold text-story-ink hover:border-primary">
                 {w.word}
-              </button>
+              </Button>
             </li>
           ))}
         </ul>

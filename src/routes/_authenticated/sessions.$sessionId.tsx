@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { StoryReader } from "@/components/StoryReader";
 
 export const Route = createFileRoute("/_authenticated/sessions/$sessionId")({
   head: () => ({ meta: [{ title: "Session · CODA Reading Toolkit" }, { name: "description", content: "Run a reading session and save notes." }, { property: "og:title", content: "Session · CODA Reading Toolkit" }, { property: "og:description", content: "Run a reading session and save notes." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -83,7 +84,9 @@ function SessionPage() {
         )}
       </header>
 
-      <section className="rounded-2xl border bg-card p-5">
+      {s.books && <StoryReader bookId={s.books.id} title={s.books.title} externalUrl={s.books.link_url} />}
+
+      <section className="border-t-4 border-story-coral bg-secondary p-5">
         <h2 className="text-xl font-semibold">Tricky words</h2>
         <form onSubmit={addWord} className="mt-3 flex gap-2">
           <Input aria-label="Tricky word" value={word} onChange={(e) => setWord(e.target.value)} placeholder="Type a word the child found hard" className="min-h-11" />
@@ -101,7 +104,7 @@ function SessionPage() {
           {hf.notes && <p className="mt-1">{hf.notes}</p>}
         </section>
       ) : (
-        <form onSubmit={finish} className="space-y-4 rounded-2xl border bg-card p-5">
+        <form onSubmit={finish} className="space-y-4 border-t-4 border-story-sky bg-card p-5">
           <h2 className="text-xl font-semibold">Finish & hand over</h2>
           {scale("engagement", "How engaged was the child?")}
           {scale("confidence", "How confident was the child?")}

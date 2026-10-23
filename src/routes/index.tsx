@@ -59,9 +59,9 @@ function Index() {
             For SADeaf volunteers
           </p>
           <h1 className="mt-3 text-4xl font-bold leading-tight text-foreground sm:text-5xl">
-            CODA
+            Read between
             <br />
-            Reading Toolkit
+            the Signs
           </h1>
           <p className="mt-5 max-w-sm text-lg text-muted-foreground">
             Everything you need to prepare and run a 1-to-1 reading session with a child of Deaf
