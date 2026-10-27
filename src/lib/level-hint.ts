@@ -7,9 +7,10 @@ export const FIT_LABELS: Record<string, string> = {
 /** Hint shown next to the level picker, based on recent handover level-fit marks (newest first). */
 export function levelFitHint(fits: string[]): string {
   const recent = fits.filter((f) => f && f !== "about_right").slice(0, 2);
-  if (recent.length === 0) return "";
-  const label = FIT_LABELS[recent[0]] ?? recent[0];
-  return recent.length > 1 && recent[1] === recent[0]
+  const first = recent[0];
+  if (!first) return "";
+  const label = FIT_LABELS[first] ?? first;
+  return recent.length > 1 && recent[1] === first
     ? `Last 2 sessions marked ${label}`
     : `Last session marked ${label}`;
 }
