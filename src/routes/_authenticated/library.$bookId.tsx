@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ExternalLink, Pencil, Volume2 } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ type WordCard = {
 };
 type Prompt = { id: string; prompt_text: string };
 import { StoryReader } from "@/components/StoryReader";
+import { WordCardDialog } from "@/components/WordCardDialog";
 
 export const Route = createFileRoute("/_authenticated/library/$bookId")({
   head: () => ({ meta: [{ title: "Book · Read between the Signs" }, { name: "description", content: "Key words and discussion prompts for this book." }, { property: "og:title", content: "Book · Read between the Signs" }, { property: "og:description", content: "Key words and discussion prompts for this book." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -48,15 +49,6 @@ const CROWD: Record<string, { label: string; hint: string }> = {
   distancing: { label: "Distancing", hint: "Link to the child's own life" },
 };
 const POINTS = ["beginning", "middle", "end"] as const;
-
-function speak(text: string) {
-  if (typeof window === "undefined" || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "en-SG";
-  u.rate = 0.85;
-  window.speechSynthesis.speak(u);
-}
 
 function BookDetail() {
   const { bookId } = Route.useParams();
