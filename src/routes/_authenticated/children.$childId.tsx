@@ -82,6 +82,24 @@ function ChildPage() {
         {child.communication_notes && <p className="mt-3 rounded-xl bg-muted p-3">{child.communication_notes}</p>}
       </header>
 
+      <section className="rounded-2xl border bg-card p-5">
+        <h2 className="text-xl font-semibold">Reading level</h2>
+        {fitHint && <p className="mt-1 text-sm font-semibold text-primary">{fitHint}</p>}
+        <div className="mt-3 flex flex-wrap items-end gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="new-level">New level</Label>
+            <select id="new-level" value={newLevel || child.current_level} onChange={(e) => setNewLevel(Number(e.target.value))} className="min-h-11 rounded-md border bg-background px-3">
+              {[1, 2, 3].map((l) => <option key={l} value={l}>Level {l} · {LEVEL_LABELS[l]}</option>)}
+            </select>
+          </div>
+          <div className="flex-1 space-y-1.5">
+            <Label htmlFor="level-reason">Short reason</Label>
+            <Input id="level-reason" value={levelReason} onChange={(e) => setLevelReason(e.target.value)} placeholder="e.g. Last two books felt too easy" className="min-h-11" />
+          </div>
+          <Button variant="outline" className="min-h-11" disabled={busy} onClick={changeLevel}>Update level</Button>
+        </div>
+      </section>
+
       {lastNote && (
         <section className="rounded-2xl border-2 border-accent bg-secondary p-5 text-secondary-foreground">
           <h2 className="font-semibold">Note from the last volunteer</h2>
