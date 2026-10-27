@@ -38,8 +38,13 @@ type SessionRow = {
   book_id: string | null;
   books: { title: string } | null;
   profiles: { full_name: string } | null;
-  handover_feedback: HF[];
+  handover_feedback: HF[] | HF | null;
 };
+
+/** The handover embed can arrive as one object or a list; normalise it. */
+function hfArray(h: SessionRow["handover_feedback"]): HF[] {
+  return h ? (Array.isArray(h) ? h : [h]) : [];
+}
 
 const NOTE_GROUPS: { label: string; keywords: string[] }[] = [
   { label: "Level & book fit", keywords: ["level", "easy", "hard", "book"] },
@@ -95,10 +100,9 @@ function ChildPage() {
   if (!data?.child) return <p>Child not found, or not assigned to you.</p>;
   const { child, sessions, words, books, templates } = data;
 
-  const allHfs = sessions.flatMap((s) => s.handover_feedback);
   const recentFits = sessions
-    .filter((s) => s.status === COMPLETED_SESSION_STATUS && s.handover_feedback.length > 0)
-    .map((s) => s.handover_feedback[0]!.level_fit);
+    .filter((s) => s.status === COMPLETED_SESSION_STATUS && hfArray(s.handover_feedback).length > 0)
+    .map((s) => hfArray(s.handover_feedback)[0]!.level_fit);
   const fitHint = levelFitHint(recentFits);
   const inProgress = sessions.find((s) => s.status === "in_progress");
 
@@ -108,9 +112,9 @@ function ChildPage() {
   const reason = suggestionReason(child.current_level, recentFits);
 
   const notes = sessions
-    .filter((s) => s.handover_feedback.length > 0)
+    .filter((s) => hfArray(s.handover_feedback).length > 0)
     .map((s) => ({
-      ...s.handover_feedback[0]!,
+      ...hfArray(s.handover_feedback)[0]!,
       volunteer: s.profiles?.full_name ?? "A volunteer",
       date: new Date(s.scheduled_at).toLocaleDateString(),
     }));
@@ -314,7 +318,7 @@ function ChildPage() {
         {sessions.length === 0 ? <p className="mt-2 text-muted-foreground">No sessions yet.</p> : (
           <ul className="mt-3 space-y-2">
             {sessions.map((s) => {
-              const hf = s.handover_feedback[0];
+              const hf = hfArray(s.handover_feedback)[0];
               return (
                 <li key={s.id}>
                   <Link to="/sessions/$sessionId" params={{ sessionId: s.id }} className="block rounded-xl border bg-card p-4 hover:border-primary">
@@ -330,7 +334,6 @@ function ChildPage() {
           </ul>
         )}
       </section>
-      {allHfs.length === 0 && null}
     </div>
   );
 }
