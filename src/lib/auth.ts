@@ -47,6 +47,6 @@ export const LEVEL_LABELS: Record<number, string> = {
 
 export const ROLE_INFO = [
   { id: "volunteer", label: "Volunteer", text: "Runs reading sessions with children. Needs a personal volunteer code from SADeaf and must finish the Volunteer Guide before seeing children." },
-  { id: "staff", label: "Programme Staff", text: "SADeaf staff. Sees all children, books and volunteers, creates volunteer codes and approves content. Needs approval from existing staff." },
+  { id: "staff", label: "Programme Staff", text: "SADeaf staff. Sees all children, books and volunteers, creates sign-up codes and approves content. Needs a staff code from existing programme staff." },
   { id: "viewer", label: "Viewer", text: "Can browse the book library only. No access to children or sessions." },
 ] as const;
