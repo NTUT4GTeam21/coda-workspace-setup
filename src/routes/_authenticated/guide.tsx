@@ -103,6 +103,25 @@ function Guide() {
     if (card) setRead((previous) => new Set([...previous, card.id]));
     setStep(step + 1);
   }
+  async function saveCard() {
+    if (!editCard) return;
+    const steps = editCard.steps.split("\n").map((s) => s.trim()).filter(Boolean);
+    if (!editCard.title.trim() || steps.length === 0) {
+      toast.error("The card needs a title and at least one step.");
+      return;
+    }
+    const { error: saveError } = await supabase
+      .from("guide_cards")
+      .update({ title: editCard.title.trim(), steps, avoid_tip: editCard.avoid_tip.trim() })
+      .eq("id", editCard.id);
+    if (saveError) {
+      toast.error(saveError.message);
+      return;
+    }
+    toast.success("Guide card saved.");
+    setEditCard(null);
+    refetch();
+  }
   async function submit() {
     if (busy || !allRead || answered !== questions.length) return;
     setBusy(true);
@@ -265,6 +284,22 @@ function Guide() {
                   <p className="mt-5 border-l-4 border-accent bg-accent/20 p-3 text-sm leading-relaxed">
                     <strong>Keep in mind:</strong> {card.avoid_tip}
                   </p>
+                )}
+                {me?.isAdmin && (
+                  <Button
+                    variant="outline"
+                    className="mt-5 min-h-11"
+                    onClick={() =>
+                      setEditCard({
+                        id: card.id,
+                        title: card.title,
+                        steps: card.steps.join("\n"),
+                        avoid_tip: card.avoid_tip,
+                      })
+                    }
+                  >
+                    <Pencil aria-hidden /> Edit this card
+                  </Button>
                 )}
               </article>
               <div className="flex justify-between gap-2">
