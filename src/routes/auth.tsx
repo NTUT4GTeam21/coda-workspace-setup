@@ -107,8 +107,13 @@ function AuthPage() {
           ) : (
             <>
               <h1 className="mt-4 text-2xl font-bold">
-                {mode === "signin" ? "Sign in" : "Create an account"}
+                {mode === "signin" ? "Sign in" : mode === "forgot" ? "Reset your password" : "Create an account"}
               </h1>
+              {mode === "forgot" && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Enter your email and we'll send you a reset link.
+                </p>
+              )}
               <form onSubmit={onSubmit} className="mt-6 space-y-4">
                 {mode === "signup" && (
                   <>
@@ -135,15 +140,17 @@ function AuthPage() {
                         </label>
                       ))}
                     </fieldset>
-                    {role === "volunteer" && (
+                    {role !== "viewer" && (
                       <div className="space-y-1.5">
-                        <Label htmlFor="code">Volunteer code from SADeaf</Label>
+                        <Label htmlFor="code">
+                          {role === "staff" ? "Staff code from SADeaf" : "Volunteer code from SADeaf"}
+                        </Label>
                         <Input
                           id="code"
                           required
                           value={code}
                           onChange={(e) => setCode(e.target.value)}
-                          placeholder="e.g. VOL-ABC123"
+                          placeholder={role === "staff" ? "e.g. STF-ABC123" : "e.g. VOL-ABC123"}
                           className="min-h-11 uppercase"
                         />
                       </div>
@@ -172,23 +179,35 @@ function AuthPage() {
                     className="min-h-11"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    minLength={8}
-                    autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="min-h-11"
-                  />
-                </div>
+                {mode !== "forgot" && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      minLength={8}
+                      autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="min-h-11"
+                    />
+                  </div>
+                )}
                 <Button type="submit" disabled={busy} className="min-h-11 w-full text-base">
-                  {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Sign up"}
+                  {busy ? "Please wait…" : mode === "signin" ? "Sign in" : mode === "forgot" ? "Send reset link" : "Sign up"}
                 </Button>
               </form>
+              {mode === "signin" && (
+                <Button
+                  variant="link"
+                  type="button"
+                  className="mt-2 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                  onClick={() => setMode("forgot")}
+                >
+                  Forgot your password?
+                </Button>
+              )}
               <Button
                 variant="link"
                 type="button"
