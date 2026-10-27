@@ -214,7 +214,7 @@ export function SessionStory({ bookId, sessionId, title }: { bookId: string; ses
           <span className="shrink-0 text-sm font-bold">{page + 1} / {story.pages.length}</span>
         </div>
         <div className="bg-card px-6 py-8 sm:px-10 sm:py-10">
-          <StoryText text={story.pages[page]} words={words} onWord={setWordIdx} />
+          <StoryText text={story.pages[page] ?? ""} words={words} onWord={setWordIdx} />
           {isLastPage && <p className="mt-5 flex items-center justify-center gap-2 font-heading font-bold text-primary"><Sparkles aria-hidden /> The end</p>}
         </div>
         <div className="flex items-center justify-between gap-3 bg-story-sky p-4 text-story-ink">

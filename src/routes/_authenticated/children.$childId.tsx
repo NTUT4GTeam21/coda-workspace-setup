@@ -98,7 +98,7 @@ function ChildPage() {
   const allHfs = sessions.flatMap((s) => s.handover_feedback);
   const recentFits = sessions
     .filter((s) => s.status === COMPLETED_SESSION_STATUS && s.handover_feedback.length > 0)
-    .map((s) => s.handover_feedback[0].level_fit);
+    .map((s) => s.handover_feedback[0]!.level_fit);
   const fitHint = levelFitHint(recentFits);
   const inProgress = sessions.find((s) => s.status === "in_progress");
 
@@ -110,7 +110,7 @@ function ChildPage() {
   const notes = sessions
     .filter((s) => s.handover_feedback.length > 0)
     .map((s) => ({
-      ...s.handover_feedback[0],
+      ...s.handover_feedback[0]!,
       volunteer: s.profiles?.full_name ?? "A volunteer",
       date: new Date(s.scheduled_at).toLocaleDateString(),
     }));

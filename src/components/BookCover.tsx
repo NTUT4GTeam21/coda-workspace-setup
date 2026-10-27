@@ -34,7 +34,7 @@ export function BookCover({ bookId, title, className }: { bookId: string; title:
     );
   }
   const h = hashId(bookId);
-  const palette = PALETTES[h % PALETTES.length];
+  const palette = PALETTES[h % PALETTES.length]!;
   const initial = (title.trim()[0] ?? "?").toUpperCase();
   return (
     <div

@@ -19,7 +19,9 @@ function shuffle<T>(items: T[]): T[] {
   const arr = [...items];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    const tmp = arr[i]!;
+    arr[i] = arr[j]!;
+    arr[j] = tmp;
   }
   return arr;
 }
@@ -33,7 +35,7 @@ export function buildQuiz(wordCards: WordCardInput[], discussionPrompts: string[
   const cards = shuffle(wordCards);
 
   if (cards.length > 0) {
-    const target = cards[0];
+    const target = cards[0]!;
     const distractors = cards.slice(1).map((c) => c.definition);
     questions.push({
       kind: "definition",
@@ -65,7 +67,7 @@ export function buildQuiz(wordCards: WordCardInput[], discussionPrompts: string[
   if (discussionPrompts.length > 0) {
     questions.push({
       kind: "discussion",
-      question: shuffle(discussionPrompts)[0],
+      question: shuffle(discussionPrompts)[0]!,
       options: [],
       correctAnswer: "Talk it over together — there's no single right answer.",
       explanation: "This is a chatting question. Any thoughtful answer counts.",
