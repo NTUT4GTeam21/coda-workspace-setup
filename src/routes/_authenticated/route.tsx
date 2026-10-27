@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_authenticated")({
   component: () => (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10">
+      <main className="mx-auto max-w-5xl px-4 pb-28 pt-6 sm:py-10">
         <Outlet />
       </main>
       <RaiseConcern variant="floating" />

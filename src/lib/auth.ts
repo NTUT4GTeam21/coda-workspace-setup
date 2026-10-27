@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { isQualificationActive, qualificationExpiresOn } from "@/lib/qualification";
 
 export type Me = {
   id: string;
   email: string;
   fullName: string;
   qualified: boolean;
+  qualifiedUntil: Date | null;
+  guideCardsRead: string[];
   isAdmin: boolean;
   isViewer: boolean;
   isVolunteer: boolean;
@@ -21,7 +24,7 @@ export function useMe() {
       const user = userData.user;
       if (!user) return null;
       const [{ data: profile }, { data: roles }] = await Promise.all([
-        supabase.from("profiles").select("full_name, qualified, requested_role").eq("id", user.id).maybeSingle(),
+        supabase.from("profiles").select("full_name, qualified, requested_role, quiz_passed_at, last_login_at, guide_cards_read").eq("id", user.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user.id),
       ]);
       const r = (roles ?? []).map((x) => x.role as string);
@@ -29,7 +32,9 @@ export function useMe() {
         id: user.id,
         email: user.email ?? "",
         fullName: profile?.full_name ?? "",
-        qualified: profile?.qualified ?? false,
+        qualified: isQualificationActive(profile?.qualified ?? false, profile?.quiz_passed_at ?? null, profile?.last_login_at ?? null),
+        qualifiedUntil: qualificationExpiresOn(profile?.quiz_passed_at ?? null),
+        guideCardsRead: profile?.guide_cards_read ?? [],
         isAdmin: r.includes("admin"),
         isViewer: r.includes("viewer"),
         isVolunteer: r.includes("volunteer"),

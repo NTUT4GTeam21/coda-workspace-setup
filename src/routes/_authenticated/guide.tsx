@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -57,6 +57,11 @@ function Guide() {
   const [submitMessage, setSubmitMessage] = useState("");
   const resultRef = useRef<HTMLDivElement>(null);
   const [passed, setPassed] = useState(false);
+  const savedRead = me?.guideCardsRead.join(",");
+  useEffect(() => {
+    if (!savedRead) return;
+    setRead((previous) => new Set([...previous, ...savedRead.split(",")]));
+  }, [savedRead]);
   const { data, error, refetch } = useQuery({
     queryKey: ["guide"],
     queryFn: async () => {
@@ -100,8 +105,20 @@ function Guide() {
   const canSubmit = me?.isVolunteer || me?.isAdmin;
 
   function advance() {
-    if (card) setRead((previous) => new Set([...previous, card.id]));
+    if (card && !read.has(card.id)) {
+      setRead((previous) => new Set([...previous, card.id]));
+      supabase.rpc("mark_guide_card_read", { _card_id: card.id }).then(({ error: e }) => {
+        if (e) toast.error("Your progress could not be saved. Please check your connection.");
+        else qc.invalidateQueries({ queryKey: ["me"] });
+      });
+    }
     setStep(step + 1);
+  }
+  function practiceAgain() {
+    setAnswers({});
+    setFeedback(null);
+    setSubmitMessage("");
+    document.getElementById("quiz-top")?.scrollIntoView({ block: "start", behavior: "instant" });
   }
   async function saveCard() {
     if (!editCard) return;
@@ -177,7 +194,8 @@ function Guide() {
           role="status"
           className="flex flex-wrap items-center gap-2 border-l-4 border-primary bg-secondary p-4 text-secondary-foreground"
         >
-          <CheckCircle2 className="size-5" aria-hidden /> You’ve passed the guide.{" "}
+          <CheckCircle2 className="size-5" aria-hidden /> You’ve passed the guide
+          {me?.qualifiedUntil ? ` · qualified until ${me.qualifiedUntil.toLocaleDateString()}` : ""}.{" "}
           <Link to="/dashboard" className="font-bold underline">
             Go to your children
           </Link>
@@ -328,7 +346,8 @@ function Guide() {
                 <p className="mb-2 text-sm font-semibold text-primary">
                   Put your care into practice
                 </p>
-                <h2 className="text-2xl font-bold">Knowledge check</h2>
+                <h2 id="quiz-top" className="scroll-mt-40 text-2xl font-bold">{completed ? "Practice knowledge check" : "Knowledge check"}</h2>
+                {completed && <p className="mt-1 text-sm">Practise as often as you like. A wrong answer won't remove your qualification; a full pass renews it for a year.</p>}
                 <p className="mt-2 text-muted-foreground">
                   {answered} of {questions.length} answered · All answers must be correct to pass.
                 </p>
@@ -381,10 +400,10 @@ function Guide() {
               {canSubmit ? (
                 <Button
                   className="min-h-12 w-full"
-                  disabled={busy || !allRead || answered !== questions.length}
+                  disabled={busy || (!allRead && !completed) || answered !== questions.length}
                   onClick={submit}
                 >
-                  {busy ? "Checking your answers…" : "Submit knowledge check"}
+                  {busy ? "Checking your answers…" : completed ? "Check my practice answers" : "Submit knowledge check"}
                   <ShieldCheck aria-hidden />
                 </Button>
               ) : (
@@ -397,11 +416,12 @@ function Guide() {
                 {feedback && (
                   <div className={cn("space-y-3 border-l-4 p-5", feedback.passed ? "border-primary bg-secondary" : "border-destructive bg-muted")}>
                     <h3 className="text-xl font-bold">{feedback.passed ? "You passed! You’re ready to read." : "Not passed yet — let’s try again."}</h3>
-                    <p>{feedback.total - feedback.incorrect_question_ids.length} of {feedback.total} correct.{feedback.passed ? " Your volunteer access is unlocked." : " All questions must be correct to pass. Your choices are kept while you review."}</p>
+                    <p>{feedback.total - feedback.incorrect_question_ids.length} of {feedback.total} correct.{feedback.passed ? " Your volunteer access is unlocked for another year." : completed ? " This was practice — your qualification is not affected." : " All questions must be correct to pass. Your choices are kept while you review."}</p>
                     {feedback.passed ? (
                       <div className="flex flex-wrap gap-2">
                         <Button asChild className="min-h-11"><Link to="/dashboard">Go to my children <ArrowRight aria-hidden /></Link></Button>
                         <Button asChild variant="outline" className="min-h-11"><Link to="/library">Explore the library <BookOpen aria-hidden /></Link></Button>
+                        <Button variant="ghost" className="min-h-11" onClick={practiceAgain}>Practise again</Button>
                       </div>
                     ) : (
                       <div className="flex flex-wrap gap-2">

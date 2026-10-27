@@ -50,6 +50,13 @@
       "when": 1793115993830,
       "tag": "0006_reusable_signup_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793120717457,
+      "tag": "0007_guide_progress_qualification_expiry",
+      "breakpoints": true
     }
   ]
 }
