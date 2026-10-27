@@ -5,6 +5,7 @@ import { Clock, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { LevelBadge } from "@/components/LevelBadge";
+import { BookCover } from "@/components/BookCover";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/library/")({
