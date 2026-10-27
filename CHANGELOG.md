@@ -7,6 +7,9 @@ Format: `- YYYY-MM-DD · <module> · <what changed> (<author or "Lovable">)`
 
 ## Unreleased
 
+- 2026-10-28 · guide · Guide progress now saves across refreshes, qualification expires after a year or 6 months without signing in, and volunteers can practise the quiz any time (Lovable)
+- 2026-10-28 · library · Added 6 new draft books about CODAs and Deaf identity for staff review; approving a story now also approves its book, word cards and prompts (Lovable)
+- 2026-10-28 · style guide · Added a bottom tab bar on phones and moved Sign out into the profile menu there (Lovable)
 - 2026-10-27 · session · Added continue-in-progress sessions, a book picker for "Choose later" sessions, session-length plans with step lists, Quick Recap flip cards, tappable key words in the story, a floating CROWD prompts panel, an end-of-story quiz saved to session history, compulsory auto-saving handover notes with friendly errors, staff deletion of abandoned sessions, and tricky-word learned ticks and spelling corrections (Lovable)
 - 2026-10-27 · child record · Added suggested books based on recent level fit, a full grouped notes history, richer session history rows and readable level-fit labels (Lovable)
 - 2026-10-27 · library · Added colourful illustrated covers to book cards (Lovable)

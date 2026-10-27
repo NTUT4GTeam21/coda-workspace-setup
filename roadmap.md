@@ -27,5 +27,9 @@
 - [x] Full notes history per child, grouped by topic when there are many.
 - [x] Session history rows show engagement, confidence, level fit and the volunteer's name.
 - [x] Tricky words can be ticked learned, spelling-corrected and are de-duplicated in the database.
+- [x] Auto-save guide cards read; yearly / 6-month-inactivity qualification expiry; practice quiz any time.
+- [x] Add 6 draft CODA / Deaf identity books to Content to review.
+- [x] Bottom tab bar on phones.
+- [x] Verified staff delete-session button and approved-story quiz save in the browser.
 - [ ] Verify the new permission rules in the browser as a non-admin volunteer. Blocker: the available signed-in account is admin; a volunteer account with a fresh volunteer code is required.
 - [ ] Confirm SADeaf's safeguarding contact to replace the placeholder line in the concern confirmation.
