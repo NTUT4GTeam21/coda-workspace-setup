@@ -7,8 +7,8 @@ import { useMe } from "@/lib/auth";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { RaiseConcern } from "@/components/RaiseConcern";
 
-const linkCls =
-  "inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground";
+const desktopLinkCls =
+  "hidden min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground sm:inline-flex";
 const activeCls = "bg-secondary text-secondary-foreground";
 
 export function AppHeader() {
@@ -51,7 +51,7 @@ export function AppHeader() {
         </Link>
         <nav aria-label="Main" className="flex flex-wrap items-center gap-1">
           {tabs.map((t) => (
-            <Link key={t.to} to={t.to} className={linkCls.replace("inline-flex", "hidden sm:inline-flex")} activeProps={{ className: activeCls }}>
+            <Link key={t.to} to={t.to} className={desktopLinkCls} activeProps={{ className: activeCls }}>
               <t.icon className="h-4 w-4" aria-hidden /> {t.label}
             </Link>
           ))}
