@@ -9,11 +9,16 @@ import {
   Check,
   CheckCircle2,
   HeartHandshake,
+  Pencil,
   ShieldCheck,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import readingGarden from "@/assets/reading-garden.jpg";
 import { parseQuizFeedback, type QuizFeedback } from "@/lib/quiz-feedback";
@@ -48,6 +53,7 @@ function Guide() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<QuizFeedback | null>(null);
+  const [editCard, setEditCard] = useState<{ id: string; title: string; steps: string; avoid_tip: string } | null>(null);
   const [submitMessage, setSubmitMessage] = useState("");
   const resultRef = useRef<HTMLDivElement>(null);
   const [passed, setPassed] = useState(false);
