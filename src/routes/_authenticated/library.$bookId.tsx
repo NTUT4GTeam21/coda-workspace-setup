@@ -80,7 +80,6 @@ function BookDetail() {
   if (isLoading) return <p className="text-muted-foreground">Loading…</p>;
   if (!data?.book) return <p>Book not found, or you don't have access yet.</p>;
   const { book, words, prompts } = data;
-  const card = openIdx !== null ? words[openIdx] : null;
 
   async function saveLink(url: string | null) {
     const { error } = await supabase.from("books").update({ link_url: url }).eq("id", bookId);
