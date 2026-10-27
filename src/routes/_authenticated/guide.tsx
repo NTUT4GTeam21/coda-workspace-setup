@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -57,6 +57,11 @@ function Guide() {
   const [submitMessage, setSubmitMessage] = useState("");
   const resultRef = useRef<HTMLDivElement>(null);
   const [passed, setPassed] = useState(false);
+  const savedRead = me?.guideCardsRead.join(",");
+  useEffect(() => {
+    if (!savedRead) return;
+    setRead((previous) => new Set([...previous, ...savedRead.split(",")]));
+  }, [savedRead]);
   const { data, error, refetch } = useQuery({
     queryKey: ["guide"],
     queryFn: async () => {
@@ -100,8 +105,20 @@ function Guide() {
   const canSubmit = me?.isVolunteer || me?.isAdmin;
 
   function advance() {
-    if (card) setRead((previous) => new Set([...previous, card.id]));
+    if (card && !read.has(card.id)) {
+      setRead((previous) => new Set([...previous, card.id]));
+      supabase.rpc("mark_guide_card_read", { _card_id: card.id }).then(({ error: e }) => {
+        if (e) toast.error("Your progress could not be saved. Please check your connection.");
+        else qc.invalidateQueries({ queryKey: ["me"] });
+      });
+    }
     setStep(step + 1);
+  }
+  function practiceAgain() {
+    setAnswers({});
+    setFeedback(null);
+    setSubmitMessage("");
+    document.getElementById("quiz-top")?.scrollIntoView({ block: "start", behavior: "instant" });
   }
   async function saveCard() {
     if (!editCard) return;
