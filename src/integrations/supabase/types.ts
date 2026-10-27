@@ -118,6 +118,51 @@ export type Database = {
           },
         ]
       }
+      child_level_changes: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+          new_level: number
+          old_level: number
+          reason: string
+          volunteer_id: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+          new_level: number
+          old_level: number
+          reason: string
+          volunteer_id: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+          new_level?: number
+          old_level?: number
+          reason?: string
+          volunteer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_level_changes_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_level_changes_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       children: {
         Row: {
           age_band: string
@@ -292,6 +337,7 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string
+          deactivated: boolean
           full_name: string
           guide_progress: number
           id: string
@@ -303,6 +349,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deactivated?: boolean
           full_name?: string
           guide_progress?: number
           id: string
@@ -314,6 +361,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deactivated?: boolean
           full_name?: string
           guide_progress?: number
           id?: string
@@ -564,6 +612,7 @@ export type Database = {
           code: string
           created_at: string
           label: string
+          role: string
           used_at: string | null
           used_by: string | null
         }
@@ -571,6 +620,7 @@ export type Database = {
           code: string
           created_at?: string
           label?: string
+          role?: string
           used_at?: string | null
           used_by?: string | null
         }
@@ -578,6 +628,7 @@ export type Database = {
           code?: string
           created_at?: string
           label?: string
+          role?: string
           used_at?: string | null
           used_by?: string | null
         }
@@ -649,6 +700,10 @@ export type Database = {
       }
       can_access_child: { Args: { _child_id: string }; Returns: boolean }
       can_read_content: { Args: never; Returns: boolean }
+      change_child_level: {
+        Args: { _child_id: string; _new_level: number; _reason: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -659,6 +714,10 @@ export type Database = {
       is_qualified: { Args: { _user_id: string }; Returns: boolean }
       set_admin_role: {
         Args: { _is_admin: boolean; _user_id: string }
+        Returns: undefined
+      }
+      set_volunteer_active: {
+        Args: { _active: boolean; _user_id: string }
         Returns: undefined
       }
       set_volunteer_qualified: {
