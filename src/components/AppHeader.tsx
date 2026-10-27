@@ -51,7 +51,7 @@ export function AppHeader() {
         </Link>
         <nav aria-label="Main" className="flex flex-wrap items-center gap-1">
           {tabs.map((t) => (
-            <Link key={t.to} to={t.to} className={`${linkCls} hidden sm:inline-flex`} activeProps={{ className: activeCls }}>
+            <Link key={t.to} to={t.to} className={linkCls.replace("inline-flex", "hidden sm:inline-flex")} activeProps={{ className: activeCls }}>
               <t.icon className="h-4 w-4" aria-hidden /> {t.label}
             </Link>
           ))}
