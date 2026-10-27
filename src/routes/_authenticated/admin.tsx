@@ -141,7 +141,7 @@ function Admin() {
                 title="Approve this story for readers?"
                 text="Only approve after you have read the whole story on the book page. Volunteers and children will then see it."
                 actionLabel="I've read it — approve"
-                onConfirm={() => call(supabase.from("book_stories").update({ status: "approved", updated_at: new Date().toISOString() }).eq("book_id", d.book_id))}
+                onConfirm={() => call(supabase.rpc("approve_book_story", { _book_id: d.book_id }))}
               />
             </li>
           ))}
