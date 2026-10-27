@@ -27,7 +27,9 @@ Status: Not started · In progress · Done · Blocked
 | Discussion prompts per book (CROWD) | Must | Tanya | In progress | Sample prompts for all 15 books need review |
 | Child record and session history | Must | Zong Nan | Done | History rows show scores, level fit and volunteer; all notes shown, grouped by topic when many |
 | Note for next volunteer | Must | Zong Nan | Done | Shown on child profile with readable labels |
-| Volunteer guide as scenario cards | Must | Chen Hui | In progress | 12 CODA background/scenario cards + 12-question quiz; permissions restored; draft needs programme review |
+| Volunteer guide as scenario cards | Must | Chen Hui | In progress | 12 cards + 12-question quiz; progress auto-saves; practice quiz any time; qualification expires yearly or after 6 months inactive; draft needs programme review |
+| Extra CODA / Deaf identity books | Should | Tanya | In progress | 6 new draft books (21 total) waiting in Content to review |
+| Phone bottom tab bar | Should | Elina | Done | Home / Library / Guide / Admin tabs on small screens |
 | Safeguarding and escalation card | Must | Chen Hui | In progress | Distress steps, private escalation guidance and Raise a concern reporting added; needs SADeaf's approved protocol and contact |
 | Session planner with templates | Should | Chloe | Done | 30/45/60-min picker when starting; step list on the session page |
 | Quick tricky-word capture | Should | Chloe | Done | Learned ticks, spelling corrections and automatic de-duplication |
