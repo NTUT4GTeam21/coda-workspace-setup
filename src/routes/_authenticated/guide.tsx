@@ -9,11 +9,16 @@ import {
   Check,
   CheckCircle2,
   HeartHandshake,
+  Pencil,
   ShieldCheck,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import readingGarden from "@/assets/reading-garden.jpg";
 import { parseQuizFeedback, type QuizFeedback } from "@/lib/quiz-feedback";
@@ -48,6 +53,7 @@ function Guide() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<QuizFeedback | null>(null);
+  const [editCard, setEditCard] = useState<{ id: string; title: string; steps: string; avoid_tip: string } | null>(null);
   const [submitMessage, setSubmitMessage] = useState("");
   const resultRef = useRef<HTMLDivElement>(null);
   const [passed, setPassed] = useState(false);
@@ -96,6 +102,25 @@ function Guide() {
   function advance() {
     if (card) setRead((previous) => new Set([...previous, card.id]));
     setStep(step + 1);
+  }
+  async function saveCard() {
+    if (!editCard) return;
+    const steps = editCard.steps.split("\n").map((s) => s.trim()).filter(Boolean);
+    if (!editCard.title.trim() || steps.length === 0) {
+      toast.error("The card needs a title and at least one step.");
+      return;
+    }
+    const { error: saveError } = await supabase
+      .from("guide_cards")
+      .update({ title: editCard.title.trim(), steps, avoid_tip: editCard.avoid_tip.trim() })
+      .eq("id", editCard.id);
+    if (saveError) {
+      toast.error(saveError.message);
+      return;
+    }
+    toast.success("Guide card saved.");
+    setEditCard(null);
+    refetch();
   }
   async function submit() {
     if (busy || !allRead || answered !== questions.length) return;
@@ -260,6 +285,22 @@ function Guide() {
                     <strong>Keep in mind:</strong> {card.avoid_tip}
                   </p>
                 )}
+                {me?.isAdmin && (
+                  <Button
+                    variant="outline"
+                    className="mt-5 min-h-11"
+                    onClick={() =>
+                      setEditCard({
+                        id: card.id,
+                        title: card.title,
+                        steps: card.steps.join("\n"),
+                        avoid_tip: card.avoid_tip,
+                      })
+                    }
+                  >
+                    <Pencil aria-hidden /> Edit this card
+                  </Button>
+                )}
               </article>
               <div className="flex justify-between gap-2">
                 <Button
@@ -404,6 +445,29 @@ function Guide() {
           </footer>
         </div>
       </div>
+      <Dialog open={!!editCard} onOpenChange={(o) => !o && setEditCard(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogTitle>Edit guide card</DialogTitle>
+          <DialogDescription>Write one step per line. Changes appear for all volunteers.</DialogDescription>
+          {editCard && (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="gc-title">Title</Label>
+                <Input id="gc-title" value={editCard.title} onChange={(e) => setEditCard({ ...editCard, title: e.target.value })} className="min-h-11" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="gc-steps">Steps (one per line)</Label>
+                <Textarea id="gc-steps" rows={7} value={editCard.steps} onChange={(e) => setEditCard({ ...editCard, steps: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="gc-avoid">Keep in mind (optional)</Label>
+                <Textarea id="gc-avoid" rows={2} value={editCard.avoid_tip} onChange={(e) => setEditCard({ ...editCard, avoid_tip: e.target.value })} />
+              </div>
+              <Button className="min-h-11 w-full" onClick={saveCard}>Save card</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

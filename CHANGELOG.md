@@ -7,6 +7,11 @@ Format: `- YYYY-MM-DD · <module> · <what changed> (<author or "Lovable">)`
 
 ## Unreleased
 
+- 2026-10-27 · login · Added forgot/reset password, role-specific sign-up codes (staff codes for staff, volunteer codes for volunteers), accurate sign-up error messages, and last sign-in updates on every visit (Lovable)
+- 2026-10-27 · access control · Volunteers can now only run and edit their own sessions and notes, cannot archive children, and can update a child's reading level with a reason; staff can deactivate departing volunteers (Lovable)
+- 2026-10-27 · admin · Added content-to-review story approvals, concerns list, staff code creation, unused-code cancellation, child archiving, and confirmations before staff/qualified switches (Lovable)
+- 2026-10-27 · safeguarding · Added a Raise a concern button (header on large screens, floating on phones) with a private form for programme staff only (Lovable)
+- 2026-10-27 · library · Book link box now pre-fills and has a confirmed Remove link button; staff can edit word cards and prompts; book pictures no longer depend on the title (Lovable)
 - 2026-10-23 · session · Corrected session completion and history labels, with retry support when notes save but completion fails (Lovable)
 - 2026-10-23 · guide · Added immediate pass/retry results, incorrect-question feedback, onward buttons and practical distress steps (Lovable)
 - 2026-10-23 · library and session · Added 15 original AI story drafts, staff editing and approval, and a colourful reading view with Bao artwork (Lovable)

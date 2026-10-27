@@ -1,13 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe, LEVEL_LABELS } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { sessionStatusLabel } from "@/lib/session-status";
+import { levelFitHint } from "@/lib/level-hint";
 
 export const Route = createFileRoute("/_authenticated/children/$childId")({
   head: () => ({ meta: [{ title: "Child profile · Read between the Signs" }, { name: "description", content: "Level, tricky words and session history." }, { property: "og:title", content: "Child profile · Read between the Signs" }, { property: "og:description", content: "Level, tricky words and session history." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -20,13 +22,16 @@ function ChildPage() {
   const navigate = useNavigate();
   const [bookId, setBookId] = useState("");
   const [busy, setBusy] = useState(false);
+  const [newLevel, setNewLevel] = useState(0);
+  const [levelReason, setLevelReason] = useState("");
+  const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["child", childId],
     queryFn: async () => {
       const [child, sessions, words, books] = await Promise.all([
         supabase.from("children").select("*").eq("id", childId).maybeSingle(),
-        supabase.from("sessions").select("id, scheduled_at, status, books(title), handover_feedback(try_next, notes, worked_well)").eq("child_id", childId).order("scheduled_at", { ascending: false }),
+        supabase.from("sessions").select("id, scheduled_at, status, books(title), handover_feedback(try_next, notes, worked_well, level_fit)").eq("child_id", childId).order("scheduled_at", { ascending: false }),
         supabase.from("tricky_words").select("id, word, mastered").eq("child_id", childId).order("created_at", { ascending: false }),
         supabase.from("books").select("id, title, level").order("level").order("title"),
       ]);
@@ -38,6 +43,20 @@ function ChildPage() {
   if (!data?.child) return <p>Child not found, or not assigned to you.</p>;
   const { child, sessions, words, books } = data;
   const lastNote = sessions.flatMap((s) => hfList(s.handover_feedback)).find((h) => h.try_next || h.notes);
+  const fitHint = levelFitHint(sessions.flatMap((s) => hfList(s.handover_feedback).map((h) => h.level_fit)));
+
+  async function changeLevel() {
+    const level = newLevel || child!.current_level;
+    if (level === child!.current_level) { toast.error("Pick a different level first."); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("change_child_level", { _child_id: childId, _new_level: level, _reason: levelReason });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Level updated to ${level} (${LEVEL_LABELS[level]}).`);
+    setLevelReason("");
+    setNewLevel(0);
+    qc.invalidateQueries({ queryKey: ["child", childId] });
+  }
 
   async function start() {
     if (!me) return;
@@ -62,6 +81,24 @@ function ChildPage() {
         <p className="mt-1 text-muted-foreground">Age {child.age_band} · Level {child.current_level} ({LEVEL_LABELS[child.current_level]})</p>
         {child.communication_notes && <p className="mt-3 rounded-xl bg-muted p-3">{child.communication_notes}</p>}
       </header>
+
+      <section className="rounded-2xl border bg-card p-5">
+        <h2 className="text-xl font-semibold">Reading level</h2>
+        {fitHint && <p className="mt-1 text-sm font-semibold text-primary">{fitHint}</p>}
+        <div className="mt-3 flex flex-wrap items-end gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="new-level">New level</Label>
+            <select id="new-level" value={newLevel || child.current_level} onChange={(e) => setNewLevel(Number(e.target.value))} className="min-h-11 rounded-md border bg-background px-3">
+              {[1, 2, 3].map((l) => <option key={l} value={l}>Level {l} · {LEVEL_LABELS[l]}</option>)}
+            </select>
+          </div>
+          <div className="flex-1 space-y-1.5">
+            <Label htmlFor="level-reason">Short reason</Label>
+            <Input id="level-reason" value={levelReason} onChange={(e) => setLevelReason(e.target.value)} placeholder="e.g. Last two books felt too easy" className="min-h-11" />
+          </div>
+          <Button variant="outline" className="min-h-11" disabled={busy} onClick={changeLevel}>Update level</Button>
+        </div>
+      </section>
 
       {lastNote && (
         <section className="rounded-2xl border-2 border-accent bg-secondary p-5 text-secondary-foreground">
@@ -113,7 +150,7 @@ function ChildPage() {
   );
 }
 
-type HF = { notes: string; try_next: string; worked_well: string };
+type HF = { notes: string; try_next: string; worked_well: string; level_fit: string };
 function hfList(h: HF | HF[] | null | undefined): HF[] {
   return h ? (Array.isArray(h) ? h : [h]) : [];
 }

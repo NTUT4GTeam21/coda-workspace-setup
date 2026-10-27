@@ -121,8 +121,13 @@ function RootComponent() {
   const router = useRouter();
 
   useEffect(() => {
+    // Record the sign-in even when the session was restored rather than freshly signed in.
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) supabase.rpc("touch_last_login").then(() => undefined);
+    });
     const { data } = supabase.auth.onAuthStateChange((event) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      if (event === "SIGNED_IN") supabase.rpc("touch_last_login").then(() => undefined);
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });

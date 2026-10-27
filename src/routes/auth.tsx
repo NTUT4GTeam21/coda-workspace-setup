@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ROLE_INFO } from "@/lib/auth";
+import { signUpErrorMessage } from "@/lib/signup-errors";
 import readingGarden from "@/assets/reading-garden.jpg";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +28,7 @@ type Role = (typeof ROLE_INFO)[number]["id"];
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [role, setRole] = useState<Role>("volunteer");
   const [code, setCode] = useState("");
   const [email, setEmail] = useState("");
@@ -46,7 +47,13 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     try {
-      if (mode === "signup") {
+      if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + "/reset-password",
+        });
+        if (error) throw error;
+        setCheckEmail(true);
+      } else if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -55,17 +62,11 @@ function AuthPage() {
             data: {
               full_name: fullName,
               requested_role: role,
-              volunteer_code: role === "volunteer" ? code.trim().toUpperCase() : "",
+              volunteer_code: role === "viewer" ? "" : code.trim().toUpperCase(),
             },
           },
         });
-        if (error) {
-          if (/database error/i.test(error.message))
-            throw new Error(
-              "That volunteer code isn't valid or has already been used. Ask SADeaf for your code.",
-            );
-          throw error;
-        }
+        if (error) throw new Error(signUpErrorMessage(error.message));
         setCheckEmail(true);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -98,19 +99,21 @@ function AuthPage() {
             <div className="mt-4">
               <h1 className="text-2xl font-bold">Check your email</h1>
               <p className="mt-2 text-muted-foreground">
-                We sent a confirmation link to {email}. Open it to finish signing up.
+                {mode === "forgot"
+                  ? `We sent a password reset link to ${email}. Open it to choose a new password.`
+                  : `We sent a confirmation link to ${email}. Open it to finish signing up.`}
               </p>
-              {role === "staff" && (
-                <p className="mt-2 text-muted-foreground">
-                  Existing programme staff will then approve your staff access.
-                </p>
-              )}
             </div>
           ) : (
             <>
               <h1 className="mt-4 text-2xl font-bold">
-                {mode === "signin" ? "Sign in" : "Create an account"}
+                {mode === "signin" ? "Sign in" : mode === "forgot" ? "Reset your password" : "Create an account"}
               </h1>
+              {mode === "forgot" && (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Enter your email and we'll send you a reset link.
+                </p>
+              )}
               <form onSubmit={onSubmit} className="mt-6 space-y-4">
                 {mode === "signup" && (
                   <>
@@ -137,15 +140,17 @@ function AuthPage() {
                         </label>
                       ))}
                     </fieldset>
-                    {role === "volunteer" && (
+                    {role !== "viewer" && (
                       <div className="space-y-1.5">
-                        <Label htmlFor="code">Volunteer code from SADeaf</Label>
+                        <Label htmlFor="code">
+                          {role === "staff" ? "Staff code from SADeaf" : "Volunteer code from SADeaf"}
+                        </Label>
                         <Input
                           id="code"
                           required
                           value={code}
                           onChange={(e) => setCode(e.target.value)}
-                          placeholder="e.g. VOL-ABC123"
+                          placeholder={role === "staff" ? "e.g. STF-ABC123" : "e.g. VOL-ABC123"}
                           className="min-h-11 uppercase"
                         />
                       </div>
@@ -174,23 +179,35 @@ function AuthPage() {
                     className="min-h-11"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    minLength={8}
-                    autoComplete={mode === "signin" ? "current-password" : "new-password"}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="min-h-11"
-                  />
-                </div>
+                {mode !== "forgot" && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      minLength={8}
+                      autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="min-h-11"
+                    />
+                  </div>
+                )}
                 <Button type="submit" disabled={busy} className="min-h-11 w-full text-base">
-                  {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Sign up"}
+                  {busy ? "Please wait…" : mode === "signin" ? "Sign in" : mode === "forgot" ? "Send reset link" : "Sign up"}
                 </Button>
               </form>
+              {mode === "signin" && (
+                <Button
+                  variant="link"
+                  type="button"
+                  className="mt-2 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                  onClick={() => setMode("forgot")}
+                >
+                  Forgot your password?
+                </Button>
+              )}
               <Button
                 variant="link"
                 type="button"

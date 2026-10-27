@@ -2,7 +2,7 @@
 
 Current state of the CODA Reading Toolkit. Read this before starting work; update it when a feature's status or the project structure changes.
 
-_Last updated: 2026-10-23_
+_Last updated: 2026-10-27_
 
 ## Timeline
 
@@ -19,7 +19,7 @@ Status: Not started · In progress · Done · Blocked
 
 | Feature | Priority | Owner | Status | Notes |
 | --- | --- | --- | --- | --- |
-| Login and access control | Must | Elina | Done | Roles: volunteer (code), staff (approved), viewer (books only) |
+| Login and access control | Must | Elina | Done | Roles: volunteer (code), staff (staff code), viewer (books only); forgot password; volunteers limited to own sessions/notes |
 | Data model (children, sessions, books, word cards) | Must | Elina | Done |  |
 | Style guide | Must | Elina | In progress | Colours and fonts set; colourful reading artwork and mint/coral/sunshine accents added |
 | Book library by level | Must | Elina | Done |  |
@@ -28,13 +28,13 @@ Status: Not started · In progress · Done · Blocked
 | Child record and session history | Must | Zong Nan | In progress | Basic profile page built |
 | Note for next volunteer | Must | Zong Nan | In progress | Shown on child profile |
 | Volunteer guide as scenario cards | Must | Chen Hui | In progress | 12 CODA background/scenario cards + 12-question quiz; permissions restored; draft needs programme review |
-| Safeguarding and escalation card | Must | Chen Hui | In progress | Distress steps and private escalation guidance added; needs SADeaf's approved protocol |
+| Safeguarding and escalation card | Must | Chen Hui | In progress | Distress steps, private escalation guidance and Raise a concern reporting added; needs SADeaf's approved protocol and contact |
 | Session planner with templates | Should | Chloe | Not started | |
 | Quick tricky-word capture | Should | Chloe | In progress | Basic version on session page |
 | Short post-session feedback | Should | Chloe | In progress | Basic version on session page |
 | SgSL Sign Bank links for key words | Should | Tanya | Not started | |
 | Recap and end-of-session quiz | Could | Chloe | Not started | |
-| Volunteer-set level | Could | Zong Nan | Not started | |
+| Volunteer-set level | Could | Zong Nan | Done | Volunteers change level 1–3 with a reason; recent level-fit marks shown as a hint |
 
 ## Project structure
 
@@ -46,9 +46,9 @@ _Update when folders or key files are added, moved or removed._
   /components   shared UI components (AppHeader, LevelBadge, ui/)
                 StoryReader: shared reading view and staff draft review
   /assets       generated reading-garden and Bao illustrations
-  /routes       one file per page (index, auth, _authenticated/dashboard, library, admin, guide, children.$childId, sessions.$sessionId)
-  /lib          shared helpers (auth.ts: current user + level labels; quiz-feedback.ts; session-status.ts)
-  /test         routing, quiz feedback and session status checks
+  /routes       one file per page (index, auth, reset-password, _authenticated/dashboard, library, admin, guide, children.$childId, sessions.$sessionId)
+  /lib          shared helpers (auth.ts: current user + level labels; quiz-feedback.ts; session-status.ts; signup-errors.ts; level-hint.ts)
+  /test         routing, quiz feedback, session status, sign-up error and level hint checks
   /integrations backend connection (auto-generated, do not edit)
 ```
 
@@ -56,7 +56,7 @@ _Update when folders or key files are added, moved or removed._
 
 - Expanded volunteer guide is a learning draft; SADeaf must review it and confirm the safeguarding contact and private reporting procedure before sessions.
 
-- The first person to sign up becomes admin automatically. Make sure SADeaf staff sign up first.
+- Sign-up now needs a code for volunteers and staff (viewers need none). Existing accounts are unaffected; staff create codes on the Admin page.
 - Word cards now link to SignASL.org (ASL) as the team asked; CLAUDE.md says SgSL. Team to confirm.
 - 15 original AI-written stories are drafts in book_stories; staff must check story text, word cards and prompts and approve each before volunteers can read them. External book links remain optional.
 - Child registration remains staff-controlled; confirm parental consent and a volunteer referral process before widening permissions.
