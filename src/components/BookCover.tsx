@@ -2,7 +2,12 @@ import { cn } from "@/lib/utils";
 import baoReading from "@/assets/bao-reading.jpg";
 
 // Cover art is keyed by book id, so renaming a book never loses its picture.
-const BAO_BOOK_ID = "00000000-0000-0000-0000-0000000000b3";
+const coverFiles = import.meta.glob("@/assets/covers/*.jpg", { eager: true, import: "default" }) as Record<string, string>;
+const COVERS: Record<string, string> = { "00000000-0000-0000-0000-0000000000b3": baoReading };
+for (const [path, url] of Object.entries(coverFiles)) {
+  const key = path.split("/").pop()!.replace(".jpg", "");
+  COVERS["00000000-0000-0000-0000-" + key.padStart(12, "0")] = url;
+}
 
 const PALETTES = [
   { bg: "bg-story-sun", ink: "text-story-ink", deco: "bg-story-coral" },
@@ -21,10 +26,11 @@ function hashId(id: string): number {
 
 /** A colourful illustrated cover for a book card, chosen deterministically from the book id. */
 export function BookCover({ bookId, title, className }: { bookId: string; title: string; className?: string }) {
-  if (bookId === BAO_BOOK_ID) {
+  const cover = COVERS[bookId];
+  if (cover) {
     return (
       <img
-        src={baoReading}
+        src={cover}
         alt={`Cover illustration for ${title}`}
         width={1280}
         height={768}
