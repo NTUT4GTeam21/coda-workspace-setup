@@ -445,6 +445,29 @@ function Guide() {
           </footer>
         </div>
       </div>
+      <Dialog open={!!editCard} onOpenChange={(o) => !o && setEditCard(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogTitle>Edit guide card</DialogTitle>
+          <DialogDescription>Write one step per line. Changes appear for all volunteers.</DialogDescription>
+          {editCard && (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="gc-title">Title</Label>
+                <Input id="gc-title" value={editCard.title} onChange={(e) => setEditCard({ ...editCard, title: e.target.value })} className="min-h-11" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="gc-steps">Steps (one per line)</Label>
+                <Textarea id="gc-steps" rows={7} value={editCard.steps} onChange={(e) => setEditCard({ ...editCard, steps: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="gc-avoid">Keep in mind (optional)</Label>
+                <Textarea id="gc-avoid" rows={2} value={editCard.avoid_tip} onChange={(e) => setEditCard({ ...editCard, avoid_tip: e.target.value })} />
+              </div>
+              <Button className="min-h-11 w-full" onClick={saveCard}>Save card</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
