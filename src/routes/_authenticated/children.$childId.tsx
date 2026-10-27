@@ -1,13 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe, LEVEL_LABELS } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { sessionStatusLabel } from "@/lib/session-status";
+import { levelFitHint } from "@/lib/level-hint";
 
 export const Route = createFileRoute("/_authenticated/children/$childId")({
   head: () => ({ meta: [{ title: "Child profile · Read between the Signs" }, { name: "description", content: "Level, tricky words and session history." }, { property: "og:title", content: "Child profile · Read between the Signs" }, { property: "og:description", content: "Level, tricky words and session history." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -20,13 +22,16 @@ function ChildPage() {
   const navigate = useNavigate();
   const [bookId, setBookId] = useState("");
   const [busy, setBusy] = useState(false);
+  const [newLevel, setNewLevel] = useState(0);
+  const [levelReason, setLevelReason] = useState("");
+  const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["child", childId],
     queryFn: async () => {
       const [child, sessions, words, books] = await Promise.all([
         supabase.from("children").select("*").eq("id", childId).maybeSingle(),
-        supabase.from("sessions").select("id, scheduled_at, status, books(title), handover_feedback(try_next, notes, worked_well)").eq("child_id", childId).order("scheduled_at", { ascending: false }),
+        supabase.from("sessions").select("id, scheduled_at, status, books(title), handover_feedback(try_next, notes, worked_well, level_fit)").eq("child_id", childId).order("scheduled_at", { ascending: false }),
         supabase.from("tricky_words").select("id, word, mastered").eq("child_id", childId).order("created_at", { ascending: false }),
         supabase.from("books").select("id, title, level").order("level").order("title"),
       ]);
