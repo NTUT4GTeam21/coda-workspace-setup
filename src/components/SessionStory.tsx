@@ -195,35 +195,37 @@ export function SessionStory({ bookId, sessionId, title }: { bookId: string; ses
   );
 
   if (isLoading) return <p className="text-muted-foreground">Loading story…</p>;
-  if (!data?.story) {
-    return (
-      <p className="border-l-4 border-accent bg-secondary p-4 text-secondary-foreground">
-        This story is still awaiting staff review. Use the key words and prompts below with a physical copy meanwhile.
-      </p>
-    );
-  }
+  if (!data) return null;
 
   const { story, words, prompts } = data;
-  const isLastPage = page === story.pages.length - 1;
+  const isLastPage = story ? page === story.pages.length - 1 : false;
 
   return (
     <section className="space-y-6" aria-label="Read the story together">
-      <div className="story-reader overflow-hidden rounded-lg border-2 border-primary">
-        <div className="flex items-center justify-between gap-3 bg-story-sun px-5 py-3 text-story-ink">
-          <span className="flex items-center gap-2 font-heading text-sm font-semibold"><BookOpen aria-hidden /> {title}</span>
-          <span className="shrink-0 text-sm font-bold">{page + 1} / {story.pages.length}</span>
-        </div>
-        <div className="bg-card px-6 py-8 sm:px-10 sm:py-10">
-          <StoryText text={story.pages[page] ?? ""} words={words} onWord={setWordIdx} />
-          {isLastPage && <p className="mt-5 flex items-center justify-center gap-2 font-heading font-bold text-primary"><Sparkles aria-hidden /> The end</p>}
-        </div>
-        <div className="flex items-center justify-between gap-3 bg-story-sky p-4 text-story-ink">
-          <Button variant="outline" className="min-h-12" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}><ArrowLeft aria-hidden /> Back</Button>
-          <div className="flex flex-wrap justify-center gap-1" aria-label="Reading progress">{story.pages.map((_, i) => <span key={i} className={cn("size-2 rounded-full", i === page ? "bg-primary" : "bg-primary/25")} />)}</div>
-          <Button className="min-h-12" onClick={() => setPage((p) => (isLastPage ? 0 : p + 1))}>{isLastPage ? "Read again" : "Next"}<ArrowRight aria-hidden /></Button>
-        </div>
-      </div>
-      <p className="text-sm text-muted-foreground">Underlined words are this book's key words — tap one to open its card.</p>
+      {story ? (
+        <>
+          <div className="story-reader overflow-hidden rounded-lg border-2 border-primary">
+            <div className="flex items-center justify-between gap-3 bg-story-sun px-5 py-3 text-story-ink">
+              <span className="flex items-center gap-2 font-heading text-sm font-semibold"><BookOpen aria-hidden /> {title}</span>
+              <span className="shrink-0 text-sm font-bold">{page + 1} / {story.pages.length}</span>
+            </div>
+            <div className="bg-card px-6 py-8 sm:px-10 sm:py-10">
+              <StoryText text={story.pages[page] ?? ""} words={words} onWord={setWordIdx} />
+              {isLastPage && <p className="mt-5 flex items-center justify-center gap-2 font-heading font-bold text-primary"><Sparkles aria-hidden /> The end</p>}
+            </div>
+            <div className="flex items-center justify-between gap-3 bg-story-sky p-4 text-story-ink">
+              <Button variant="outline" className="min-h-12" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}><ArrowLeft aria-hidden /> Back</Button>
+              <div className="flex flex-wrap justify-center gap-1" aria-label="Reading progress">{story.pages.map((_, i) => <span key={i} className={cn("size-2 rounded-full", i === page ? "bg-primary" : "bg-primary/25")} />)}</div>
+              <Button className="min-h-12" onClick={() => setPage((p) => (isLastPage ? 0 : p + 1))}>{isLastPage ? "Read again" : "Next"}<ArrowRight aria-hidden /></Button>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground">Underlined words are this book's key words — tap one to open its card.</p>
+        </>
+      ) : (
+        <p className="border-l-4 border-accent bg-secondary p-4 text-secondary-foreground">
+          This story is still awaiting staff review. Use the key words and prompts below with a physical copy meanwhile.
+        </p>
+      )}
 
       {prompts.length > 0 && (
         <section aria-label="Discussion prompts">
