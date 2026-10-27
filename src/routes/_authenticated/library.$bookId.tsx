@@ -195,30 +195,7 @@ function BookDetail() {
         </div>
       </section>
 
-      <Dialog open={!!card} onOpenChange={(o) => !o && setOpenIdx(null)}>
-        <DialogContent className="max-w-lg rounded-3xl">
-          {card && (
-            <div className="space-y-5 text-center">
-              <DialogTitle className="font-heading text-5xl font-bold text-primary">{card.word}</DialogTitle>
-              <p className="text-lg text-muted-foreground">/{card.pronunciation}/</p>
-              <Button variant="secondary" className="min-h-12" onClick={() => speak(card.word)}>
-                <Volume2 className="h-5 w-5" aria-hidden /> Hear it
-              </Button>
-              <DialogDescription className="text-xl text-foreground">{card.definition}</DialogDescription>
-              <p className="rounded-2xl bg-muted p-4 text-lg italic">"{card.example_sentence}"</p>
-              {card.sign_bank_url && (
-                <a href={card.sign_bank_url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 font-semibold text-primary underline-offset-4 hover:underline">
-                  See the sign on SignASL.org <ExternalLink className="h-4 w-4" aria-hidden />
-                </a>
-              )}
-              <div className="flex justify-between gap-2">
-                <Button variant="outline" className="min-h-12 flex-1" disabled={openIdx === 0} onClick={() => setOpenIdx((i) => (i ?? 1) - 1)}>Previous</Button>
-                <Button className="min-h-12 flex-1" disabled={openIdx === words.length - 1} onClick={() => setOpenIdx((i) => (i ?? 0) + 1)}>Next</Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <WordCardDialog cards={words} openIdx={openIdx} onClose={() => setOpenIdx(null)} onNavigate={setOpenIdx} />
 
       <Dialog open={!!editWord} onOpenChange={(o) => !o && setEditWord(null)}>
         <DialogContent className="max-w-lg">
