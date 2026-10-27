@@ -75,7 +75,7 @@ export function RaiseConcern({ variant }: { variant: "header" | "floating" }) {
           </Button>
         ) : (
           <Button
-            className="fixed bottom-5 right-5 z-30 min-h-14 rounded-full px-5 shadow-lg sm:hidden"
+            className="fixed bottom-24 right-4 z-30 min-h-14 rounded-full px-5 shadow-lg sm:hidden"
             aria-label="Raise a concern"
           >
             <HeartHandshake className="h-5 w-5" aria-hidden /> Concern
