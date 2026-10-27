@@ -61,6 +61,7 @@ function SessionPage() {
     setBusy(false);
     if (statusError) { toast.error("Notes saved, but the session could not finish. Please try again."); return; }
     toast.success("Session saved for the next volunteer.");
+    setEditing(false);
     qc.invalidateQueries();
   }
 
@@ -116,7 +117,7 @@ function SessionPage() {
         </section>
       ) : (
         <form onSubmit={finish} className="space-y-4 border-t-4 border-story-sky bg-card p-5">
-          <h2 className="text-xl font-semibold">Finish & hand over</h2>
+          <h2 className="text-xl font-semibold">{editing ? "Edit my notes" : "Finish & hand over"}</h2>
           {scale("engagement", "How engaged was the child?")}
           {scale("confidence", "How confident was the child?")}
           <div className="grid gap-3 sm:grid-cols-2">
