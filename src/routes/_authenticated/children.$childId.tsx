@@ -43,6 +43,20 @@ function ChildPage() {
   if (!data?.child) return <p>Child not found, or not assigned to you.</p>;
   const { child, sessions, words, books } = data;
   const lastNote = sessions.flatMap((s) => hfList(s.handover_feedback)).find((h) => h.try_next || h.notes);
+  const fitHint = levelFitHint(sessions.flatMap((s) => hfList(s.handover_feedback).map((h) => h.level_fit)));
+
+  async function changeLevel() {
+    const level = newLevel || child!.current_level;
+    if (level === child!.current_level) { toast.error("Pick a different level first."); return; }
+    setBusy(true);
+    const { error } = await supabase.rpc("change_child_level", { _child_id: childId, _new_level: level, _reason: levelReason });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Level updated to ${level} (${LEVEL_LABELS[level]}).`);
+    setLevelReason("");
+    setNewLevel(0);
+    qc.invalidateQueries({ queryKey: ["child", childId] });
+  }
 
   async function start() {
     if (!me) return;
@@ -118,7 +132,7 @@ function ChildPage() {
   );
 }
 
-type HF = { notes: string; try_next: string; worked_well: string };
+type HF = { notes: string; try_next: string; worked_well: string; level_fit: string };
 function hfList(h: HF | HF[] | null | undefined): HF[] {
   return h ? (Array.isArray(h) ? h : [h]) : [];
 }
