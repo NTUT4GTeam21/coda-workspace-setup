@@ -34,11 +34,12 @@ export function StoryReader({ bookId, title, externalUrl }: { bookId: string; ti
     const pages = editing ? draftPages.map((p) => p.trim()) : story.pages;
     if (pages.some((p) => !p)) { toast.error("Each page needs story text."); return; }
     setSaving(true);
-    const { error } = await supabase.from("book_stories").update({ pages, status: approve ? "approved" : "draft", updated_at: new Date().toISOString() }).eq("book_id", bookId);
+    let { error } = await supabase.from("book_stories").update({ pages, status: "draft", updated_at: new Date().toISOString() }).eq("book_id", bookId);
+    if (!error && approve) ({ error } = await supabase.rpc("approve_book_story", { _book_id: bookId }));
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     setEditing(false);
-    await qc.invalidateQueries({ queryKey: ["story", bookId] });
+    await qc.invalidateQueries();
     toast.success(approve ? "Story approved for readers." : "Story saved as a draft.");
   }
 
