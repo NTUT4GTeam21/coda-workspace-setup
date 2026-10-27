@@ -79,10 +79,47 @@ function BookDetail() {
     },
   });
 
+  // Pre-fill the link box with the book's current link once it loads.
+  useEffect(() => {
+    if (data?.book) setLink(data.book.link_url ?? "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.book?.id]);
+
   if (isLoading) return <p className="text-muted-foreground">Loading…</p>;
   if (!data?.book) return <p>Book not found, or you don't have access yet.</p>;
   const { book, words, prompts } = data;
   const card = openIdx !== null ? words[openIdx] : null;
+
+  async function saveLink(url: string | null) {
+    const { error } = await supabase.from("books").update({ link_url: url }).eq("id", bookId);
+    if (error) { toast.error(error.message); return; }
+    toast.success(url ? "Book link saved" : "Book link removed");
+    qc.invalidateQueries({ queryKey: ["book", bookId] });
+  }
+
+  async function saveWord() {
+    if (!editWord) return;
+    const { error } = await supabase.from("word_cards").update({
+      word: editWord.word.trim(),
+      definition: editWord.definition.trim(),
+      pronunciation: editWord.pronunciation.trim(),
+      example_sentence: editWord.example_sentence.trim(),
+      sign_bank_url: editWord.sign_bank_url?.trim() || null,
+    }).eq("id", editWord.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Word card saved");
+    setEditWord(null);
+    qc.invalidateQueries({ queryKey: ["book", bookId] });
+  }
+
+  async function savePrompt() {
+    if (!editPrompt) return;
+    const { error } = await supabase.from("discussion_prompts").update({ prompt_text: editPrompt.prompt_text.trim() }).eq("id", editPrompt.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Prompt saved");
+    setEditPrompt(null);
+    qc.invalidateQueries({ queryKey: ["book", bookId] });
+  }
 
   return (
     <div className="space-y-8">
@@ -95,15 +132,28 @@ function BookDetail() {
         <p className="mt-2 text-lg text-muted-foreground">{book.summary}</p>
         <p className="mt-2 text-sm text-muted-foreground">{book.author} · {book.reading_time} min · {book.tags.join(", ")}</p>
         {me?.isAdmin && (
-          <form className="mt-3 flex gap-2" onSubmit={async (e) => {
-            e.preventDefault();
-            const { error } = await supabase.from("books").update({ link_url: link || null }).eq("id", bookId);
-            if (error) { toast.error(error.message); return; }
-            toast.success("Book link saved");
-            qc.invalidateQueries({ queryKey: ["book", bookId] });
-          }}>
-            <Input aria-label="Link to the book" type="url" placeholder="Paste a link to the book (library, publisher, e-book)" value={link} onChange={(e) => setLink(e.target.value)} className="min-h-11" />
+          <form className="mt-3 flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); saveLink(link.trim() || null); }}>
+            <Input aria-label="Link to the book" type="url" placeholder="Paste a link to the book (library, publisher, e-book)" value={link} onChange={(e) => setLink(e.target.value)} className="min-h-11 flex-1" />
             <Button type="submit" variant="outline" className="min-h-11">Save link</Button>
+            {book.link_url && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button type="button" variant="ghost" className="min-h-11 text-destructive">Remove link</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Remove the book link?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Volunteers will no longer see a link for “{book.title}”. You can paste a new link later.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Keep the link</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => { setLink(""); saveLink(null); }}>Remove link</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </form>
         )}
       </header>
