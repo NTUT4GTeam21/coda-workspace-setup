@@ -1,15 +1,38 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { ArrowLeft, ExternalLink, Volume2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, ExternalLink, Pencil, Volume2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { LevelBadge } from "@/components/LevelBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+
+type WordCard = {
+  id: string;
+  word: string;
+  definition: string;
+  pronunciation: string;
+  example_sentence: string;
+  sign_bank_url: string | null;
+};
+type Prompt = { id: string; prompt_text: string };
 import { StoryReader } from "@/components/StoryReader";
 
 export const Route = createFileRoute("/_authenticated/library/$bookId")({
@@ -41,6 +64,8 @@ function BookDetail() {
   const { data: me } = useMe();
   const qc = useQueryClient();
   const [link, setLink] = useState("");
+  const [editWord, setEditWord] = useState<WordCard | null>(null);
+  const [editPrompt, setEditPrompt] = useState<Prompt | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["book", bookId],
