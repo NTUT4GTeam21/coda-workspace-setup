@@ -227,6 +227,50 @@ function BookDetail() {
           )}
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!editWord} onOpenChange={(o) => !o && setEditWord(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogTitle>Edit word card</DialogTitle>
+          <DialogDescription>Changes save for everyone after staff review.</DialogDescription>
+          {editWord && (
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="ew-word">Word</Label>
+                <Input id="ew-word" value={editWord.word} onChange={(e) => setEditWord({ ...editWord, word: e.target.value })} className="min-h-11" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="ew-pron">Pronunciation</Label>
+                <Input id="ew-pron" value={editWord.pronunciation} onChange={(e) => setEditWord({ ...editWord, pronunciation: e.target.value })} className="min-h-11" />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="ew-def">Definition</Label>
+                <Textarea id="ew-def" value={editWord.definition} onChange={(e) => setEditWord({ ...editWord, definition: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="ew-ex">Example sentence</Label>
+                <Textarea id="ew-ex" value={editWord.example_sentence} onChange={(e) => setEditWord({ ...editWord, example_sentence: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="ew-sign">Sign link (SignASL.org)</Label>
+                <Input id="ew-sign" type="url" value={editWord.sign_bank_url ?? ""} onChange={(e) => setEditWord({ ...editWord, sign_bank_url: e.target.value })} className="min-h-11" />
+              </div>
+              <Button className="min-h-11 w-full" onClick={saveWord}>Save word card</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editPrompt} onOpenChange={(o) => !o && setEditPrompt(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogTitle>Edit discussion prompt</DialogTitle>
+          {editPrompt && (
+            <div className="space-y-3">
+              <Textarea aria-label="Prompt text" rows={4} value={editPrompt.prompt_text} onChange={(e) => setEditPrompt({ ...editPrompt, prompt_text: e.target.value })} />
+              <Button className="min-h-11 w-full" onClick={savePrompt}>Save prompt</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
