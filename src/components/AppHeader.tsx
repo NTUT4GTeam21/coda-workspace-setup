@@ -31,6 +31,7 @@ export function AppHeader() {
   ] as const;
 
   return (
+    <>
     <header className="sticky top-0 z-20 border-b bg-card/90 backdrop-blur">
       <div className="story-stripe" aria-hidden>
         <span />
@@ -73,6 +74,7 @@ export function AppHeader() {
           </Button>
         </nav>
       </div>
+    </header>
       <nav
         aria-label="Main tabs"
         className="fixed inset-x-0 bottom-0 z-30 grid border-t bg-card pb-[env(safe-area-inset-bottom)] sm:hidden"
@@ -90,6 +92,6 @@ export function AppHeader() {
           </Link>
         ))}
       </nav>
-    </header>
+    </>
   );
 }
