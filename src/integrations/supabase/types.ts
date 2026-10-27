@@ -339,6 +339,7 @@ export type Database = {
           created_at: string
           deactivated: boolean
           full_name: string
+          guide_cards_read: string[]
           guide_progress: number
           id: string
           last_login_at: string | null
@@ -351,6 +352,7 @@ export type Database = {
           created_at?: string
           deactivated?: boolean
           full_name?: string
+          guide_cards_read?: string[]
           guide_progress?: number
           id: string
           last_login_at?: string | null
@@ -363,6 +365,7 @@ export type Database = {
           created_at?: string
           deactivated?: boolean
           full_name?: string
+          guide_cards_read?: string[]
           guide_progress?: number
           id?: string
           last_login_at?: string | null
@@ -697,6 +700,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_book_story: { Args: { _book_id: string }; Returns: undefined }
       approve_staff: {
         Args: { _approve: boolean; _user_id: string }
         Returns: undefined
@@ -715,6 +719,7 @@ export type Database = {
         Returns: boolean
       }
       is_qualified: { Args: { _user_id: string }; Returns: boolean }
+      mark_guide_card_read: { Args: { _card_id: string }; Returns: undefined }
       set_admin_role: {
         Args: { _is_admin: boolean; _user_id: string }
         Returns: undefined
