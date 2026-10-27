@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useMe } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +23,8 @@ function SessionPage() {
   const [word, setWord] = useState("");
   const [fb, setFb] = useState({ engagement: 3, confidence: 3, level_fit: "about_right", finished_book: "yes", worked_well: "", try_next: "", notes: "" });
   const [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const { data: me } = useMe();
 
   const key = ["session", sessionId];
   const { data, isLoading } = useQuery({
@@ -97,13 +100,19 @@ function SessionPage() {
         <ul className="mt-3 flex flex-wrap gap-2">{words.map((w) => <li key={w.id} className="rounded-full border bg-muted px-3 py-1">{w.word}</li>)}</ul>
       </section>
 
-      {hf && s.status === COMPLETED_SESSION_STATUS ? (
+      {hf && s.status === COMPLETED_SESSION_STATUS && !editing ? (
         <section className="rounded-2xl border bg-secondary p-5 text-secondary-foreground">
           <h2 className="text-xl font-semibold">Saved notes</h2>
           <p className="mt-2">Engagement {hf.engagement}/5 · Confidence {hf.confidence}/5 · Level: {hf.level_fit} · Finished book: {hf.finished_book}</p>
           {hf.worked_well && <p className="mt-1"><strong>Worked well:</strong> {hf.worked_well}</p>}
           {hf.try_next && <p className="mt-1"><strong>Try next:</strong> {hf.try_next}</p>}
           {hf.notes && <p className="mt-1">{hf.notes}</p>}
+          {s.volunteer_id === me?.id && (
+            <Button variant="outline" className="mt-3 min-h-11" onClick={() => {
+              setFb({ engagement: hf.engagement, confidence: hf.confidence, level_fit: hf.level_fit, finished_book: hf.finished_book, worked_well: hf.worked_well, try_next: hf.try_next, notes: hf.notes });
+              setEditing(true);
+            }}>Edit my notes</Button>
+          )}
         </section>
       ) : (
         <form onSubmit={finish} className="space-y-4 border-t-4 border-story-sky bg-card p-5">
