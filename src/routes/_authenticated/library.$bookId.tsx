@@ -165,10 +165,15 @@ function BookDetail() {
         <p className="text-sm text-muted-foreground">Tap a word to open its card and go through it with the child.</p>
         <ul className="mt-3 flex flex-wrap gap-3">
           {words.map((w, i) => (
-            <li key={w.id}>
+            <li key={w.id} className="flex items-center gap-1">
               <Button variant="outline" onClick={() => setOpenIdx(i)} className="min-h-14 rounded-lg border-2 bg-story-sun px-5 font-heading text-lg font-semibold text-story-ink hover:border-primary">
                 {w.word}
               </Button>
+              {me?.isAdmin && (
+                <Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={`Edit word card ${w.word}`} onClick={() => setEditWord(w)}>
+                  <Pencil className="h-4 w-4" aria-hidden />
+                </Button>
+              )}
             </li>
           ))}
         </ul>
@@ -185,6 +190,11 @@ function BookDetail() {
                   <li key={x.id} className="rounded-xl border bg-card p-4">
                     <p className="text-xs font-bold text-primary">{CROWD[x.crowd_type]?.label} <span className="font-normal text-muted-foreground">· {CROWD[x.crowd_type]?.hint}</span></p>
                     <p className="mt-1">{x.prompt_text}</p>
+                    {me?.isAdmin && (
+                      <Button variant="ghost" size="sm" className="mt-2 min-h-11" onClick={() => setEditPrompt(x)}>
+                        <Pencil className="h-4 w-4" aria-hidden /> Edit prompt
+                      </Button>
+                    )}
                   </li>
                 ))}
               </ul>
