@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useMe } from "@/lib/auth";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { RaiseConcern } from "@/components/RaiseConcern";
 
 const linkCls =
   "inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground";
@@ -57,6 +58,7 @@ export function AppHeader() {
               <Shield className="h-4 w-4" aria-hidden /> Admin
             </Link>
           )}
+          {me && (me.isVolunteer || me.isAdmin) && <RaiseConcern variant="header" />}
           {me && <Popover>
             <PopoverTrigger asChild><Button variant="outline" className="min-h-11 max-w-44" aria-label="Your profile"><UserRound aria-hidden /><span className="truncate">{me.fullName || "My profile"}</span></Button></PopoverTrigger>
             <PopoverContent align="end" className="space-y-2">

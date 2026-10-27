@@ -9,6 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import baoReading from "@/assets/bao-reading.jpg";
 
+// Cover art is keyed by book id, so renaming a book never loses its picture.
+const BAO_BOOK_ID = "00000000-0000-0000-0000-0000000000b3";
+
 export function StoryReader({ bookId, title, externalUrl }: { bookId: string; title: string; externalUrl?: string | null }) {
   const { data: me } = useMe();
   const qc = useQueryClient();
@@ -45,7 +48,7 @@ export function StoryReader({ bookId, title, externalUrl }: { bookId: string; ti
         <span className="flex items-center gap-2 font-heading text-sm font-semibold"><BookOpen aria-hidden /> {title}</span>
         <span className="shrink-0 text-sm font-bold">{page + 1} / {story.pages.length}</span>
       </div>
-      {title === "Bao and the Big Rain" && <img src={baoReading} alt="Bao the cat shelters under a table as rain falls outside." width={1280} height={768} loading="lazy" className="h-auto w-full" />}
+      {bookId === BAO_BOOK_ID && <img src={baoReading} alt="Bao the cat shelters under a table as rain falls outside." width={1280} height={768} loading="lazy" className="h-auto w-full" />}
       <div className="bg-card px-6 py-8 sm:px-10 sm:py-10">
         <p className="min-h-36 whitespace-pre-line font-heading text-xl leading-relaxed sm:text-2xl">{story.pages[page]}</p>
         {page === story.pages.length - 1 && <p className="mt-5 flex items-center justify-center gap-2 font-heading font-bold text-primary"><Sparkles aria-hidden /> The end</p>}

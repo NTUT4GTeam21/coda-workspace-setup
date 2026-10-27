@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { AppHeader } from "@/components/AppHeader";
+import { RaiseConcern } from "@/components/RaiseConcern";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/_authenticated")({
       <main className="mx-auto max-w-5xl px-4 py-6 sm:py-10">
         <Outlet />
       </main>
+      <RaiseConcern variant="floating" />
     </div>
   ),
 });
