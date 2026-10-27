@@ -612,6 +612,7 @@ export type Database = {
           code: string
           created_at: string
           label: string
+          reusable: boolean
           role: string
           used_at: string | null
           used_by: string | null
@@ -620,6 +621,7 @@ export type Database = {
           code: string
           created_at?: string
           label?: string
+          reusable?: boolean
           role?: string
           used_at?: string | null
           used_by?: string | null
@@ -628,6 +630,7 @@ export type Database = {
           code?: string
           created_at?: string
           label?: string
+          reusable?: boolean
           role?: string
           used_at?: string | null
           used_by?: string | null

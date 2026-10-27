@@ -7,6 +7,10 @@ Format: `- YYYY-MM-DD · <module> · <what changed> (<author or "Lovable">)`
 
 ## Unreleased
 
+- 2026-10-27 · session · Added continue-in-progress sessions, a book picker for "Choose later" sessions, session-length plans with step lists, Quick Recap flip cards, tappable key words in the story, a floating CROWD prompts panel, an end-of-story quiz saved to session history, compulsory auto-saving handover notes with friendly errors, staff deletion of abandoned sessions, and tricky-word learned ticks and spelling corrections (Lovable)
+- 2026-10-27 · child record · Added suggested books based on recent level fit, a full grouped notes history, richer session history rows and readable level-fit labels (Lovable)
+- 2026-10-27 · library · Added colourful illustrated covers to book cards (Lovable)
+- 2026-10-27 · login · Added temporary shared sign-up codes ADMIN (staff) and VOLUNTEER (volunteer) that can be reused until staff cancel them (Lovable)
 - 2026-10-27 · login · Added forgot/reset password, role-specific sign-up codes (staff codes for staff, volunteer codes for volunteers), accurate sign-up error messages, and last sign-in updates on every visit (Lovable)
 - 2026-10-27 · access control · Volunteers can now only run and edit their own sessions and notes, cannot archive children, and can update a child's reading level with a reason; staff can deactivate departing volunteers (Lovable)
 - 2026-10-27 · admin · Added content-to-review story approvals, concerns list, staff code creation, unused-code cancellation, child archiving, and confirmations before staff/qualified switches (Lovable)

@@ -5,7 +5,7 @@
 - [x] Restrict volunteers to their own sessions and handover notes; block volunteers from archiving children (database-enforced).
 - [x] Let volunteers edit their own past handover notes and change a child's level 1–3 with a reason plus a level-fit hint.
 - [x] Pre-fill the book link box and add a confirmed Remove link button.
-- [x] Replace first-signer-becomes-admin with role-specific sign-up codes (staff codes, volunteer codes; viewers need none).
+- [x] Replace first-signer-becomes-admin with role-specific sign-up codes; temporary shared codes ADMIN (staff) and VOLUNTEER (volunteer) are reusable for now.
 - [x] Key book cover art by book id so renaming a title keeps its picture.
 - [x] Let staff cancel unused sign-up codes and deactivate/reactivate volunteers.
 - [x] Make sign-up errors role-accurate (code errors only when the code is the problem).
@@ -13,5 +13,19 @@
 - [x] Add admin Content to review (draft story count, read link, approve after reading) and Concerns sections.
 - [x] Let staff edit word cards, discussion prompts and guide cards, and archive children.
 - [x] Add Raise a concern (floating on phones, header on larger screens) saving privately to safeguarding_reports.
+- [x] Prevent duplicate sessions: continue-in-progress prompt, disabled start while saving, staff can delete sessions with no handover note.
+- [x] Book picker on the session page for "Choose later" sessions.
+- [x] Suggest up to 3 unread books at the right level with reasons (level fit driven).
+- [x] Session-length template picker (30/45/60 min) with a step list on the session page.
+- [x] Quick Recap flip cards (unlearned tricky words + last session's key words).
+- [x] Tappable underlined key words in the story, CROWD prompts under the story and in a floating collapsible panel.
+- [x] Colourful illustrated covers on book cards.
+- [x] End-of-story 2–3 question quiz (definition, complete-the-sentence, discussion), randomised answers, no score, saved to quiz results and shown in session history.
+- [x] Handover save errors shown as friendly messages (live constraints already matched the new values; no data drift found).
+- [x] Compulsory handover notes with auto-saved drafts and a leave-without-saving reminder.
+- [x] Readable labels (Too easy / About right / Too hard; Yes / Partly / No) everywhere notes appear.
+- [x] Full notes history per child, grouped by topic when there are many.
+- [x] Session history rows show engagement, confidence, level fit and the volunteer's name.
+- [x] Tricky words can be ticked learned, spelling-corrected and are de-duplicated in the database.
 - [ ] Verify the new permission rules in the browser as a non-admin volunteer. Blocker: the available signed-in account is admin; a volunteer account with a fresh volunteer code is required.
 - [ ] Confirm SADeaf's safeguarding contact to replace the placeholder line in the concern confirmation.

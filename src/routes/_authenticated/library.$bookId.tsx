@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ExternalLink, Pencil, Volume2 } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMe } from "@/lib/auth";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,7 @@ type WordCard = {
 };
 type Prompt = { id: string; prompt_text: string };
 import { StoryReader } from "@/components/StoryReader";
+import { WordCardDialog } from "@/components/WordCardDialog";
 
 export const Route = createFileRoute("/_authenticated/library/$bookId")({
   head: () => ({ meta: [{ title: "Book · Read between the Signs" }, { name: "description", content: "Key words and discussion prompts for this book." }, { property: "og:title", content: "Book · Read between the Signs" }, { property: "og:description", content: "Key words and discussion prompts for this book." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -48,15 +49,6 @@ const CROWD: Record<string, { label: string; hint: string }> = {
   distancing: { label: "Distancing", hint: "Link to the child's own life" },
 };
 const POINTS = ["beginning", "middle", "end"] as const;
-
-function speak(text: string) {
-  if (typeof window === "undefined" || !window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "en-SG";
-  u.rate = 0.85;
-  window.speechSynthesis.speak(u);
-}
 
 function BookDetail() {
   const { bookId } = Route.useParams();
@@ -88,7 +80,6 @@ function BookDetail() {
   if (isLoading) return <p className="text-muted-foreground">Loading…</p>;
   if (!data?.book) return <p>Book not found, or you don't have access yet.</p>;
   const { book, words, prompts } = data;
-  const card = openIdx !== null ? words[openIdx] : null;
 
   async function saveLink(url: string | null) {
     const { error } = await supabase.from("books").update({ link_url: url }).eq("id", bookId);
@@ -203,30 +194,7 @@ function BookDetail() {
         </div>
       </section>
 
-      <Dialog open={!!card} onOpenChange={(o) => !o && setOpenIdx(null)}>
-        <DialogContent className="max-w-lg rounded-3xl">
-          {card && (
-            <div className="space-y-5 text-center">
-              <DialogTitle className="font-heading text-5xl font-bold text-primary">{card.word}</DialogTitle>
-              <p className="text-lg text-muted-foreground">/{card.pronunciation}/</p>
-              <Button variant="secondary" className="min-h-12" onClick={() => speak(card.word)}>
-                <Volume2 className="h-5 w-5" aria-hidden /> Hear it
-              </Button>
-              <DialogDescription className="text-xl text-foreground">{card.definition}</DialogDescription>
-              <p className="rounded-2xl bg-muted p-4 text-lg italic">"{card.example_sentence}"</p>
-              {card.sign_bank_url && (
-                <a href={card.sign_bank_url} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 font-semibold text-primary underline-offset-4 hover:underline">
-                  See the sign on SignASL.org <ExternalLink className="h-4 w-4" aria-hidden />
-                </a>
-              )}
-              <div className="flex justify-between gap-2">
-                <Button variant="outline" className="min-h-12 flex-1" disabled={openIdx === 0} onClick={() => setOpenIdx((i) => (i ?? 1) - 1)}>Previous</Button>
-                <Button className="min-h-12 flex-1" disabled={openIdx === words.length - 1} onClick={() => setOpenIdx((i) => (i ?? 0) + 1)}>Next</Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <WordCardDialog cards={words} openIdx={openIdx} onClose={() => setOpenIdx(null)} onNavigate={setOpenIdx} />
 
       <Dialog open={!!editWord} onOpenChange={(o) => !o && setEditWord(null)}>
         <DialogContent className="max-w-lg">

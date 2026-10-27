@@ -5,6 +5,7 @@ import { Clock, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { LevelBadge } from "@/components/LevelBadge";
+import { BookCover } from "@/components/BookCover";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/library/")({
@@ -95,6 +96,7 @@ function Library() {
               params={{ bookId: b.id }}
               className="flex h-full flex-col rounded-2xl border bg-card p-5 transition hover:border-primary hover:shadow-md focus-visible:outline-2 focus-visible:outline-ring"
             >
+              <BookCover bookId={b.id} title={b.title} className="mb-3" />
               <LevelBadge level={b.level} className="self-start" />
               <h2 className="mt-3 text-lg font-semibold leading-snug">{b.title}</h2>
               <p className="mt-1 flex-1 text-sm text-muted-foreground">{b.summary}</p>

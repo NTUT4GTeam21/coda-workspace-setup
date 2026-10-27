@@ -36,6 +36,20 @@
       "when": 1793114814920,
       "tag": "0004_permissions_signup_codes",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793115963312,
+      "tag": "0005_dedupe_tricky_words",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793115993830,
+      "tag": "0006_reusable_signup_codes",
+      "breakpoints": true
     }
   ]
 }

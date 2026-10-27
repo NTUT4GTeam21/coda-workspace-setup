@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS tricky_words_child_word_unique ON public.tricky_words (child_id, lower(word));
