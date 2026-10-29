@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SessionStory } from "@/components/SessionStory";
 import { QuickRecap } from "@/components/QuickRecap";
-import { COMPLETED_SESSION_STATUS, sessionStatusLabel } from "@/lib/session-status";
+import { canContinueSession, COMPLETED_SESSION_STATUS, sessionStatusLabel } from "@/lib/session-status";
 import { finishedBookLabel, friendlySaveError, levelFitLabel } from "@/lib/labels";
 import {
   AlertDialog,
@@ -53,12 +53,14 @@ function SessionPage() {
   const [editWordId, setEditWordId] = useState<string | null>(null);
   const [editWordText, setEditWordText] = useState("");
   const { data: me } = useMe();
-  const draftKey = `handover-draft-${sessionId}`;
+  const draftKey = `handover-draft-${sessionId}-${me?.id ?? "signed-out"}`;
   const restored = useRef(false);
+
 
   const key = ["session", sessionId];
   const { data, isLoading } = useQuery({
     queryKey: key,
+    refetchInterval: 5000,
     queryFn: async () => {
       const { data: s } = await supabase
         .from("sessions")
@@ -74,9 +76,19 @@ function SessionPage() {
     },
   });
 
+  const canWrite = data?.s ? canContinueSession(data.s.volunteer_id, me?.id, me?.isAdmin) : false;
+
+  useEffect(() => {
+    if (data?.s && !canWrite) {
+      setDirty(false);
+      setEditing(false);
+      setFb(EMPTY_FB);
+    }
+  }, [data?.s, canWrite]);
+
   // Restore an auto-saved handover draft once the session has loaded.
   useEffect(() => {
-    if (restored.current || !data) return;
+    if (restored.current || !data || !me || !canWrite) return;
     restored.current = true;
     if (data.hf) return;
     try {
@@ -90,21 +102,21 @@ function SessionPage() {
       // Ignore a broken draft.
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
+  }, [data, me, canWrite, draftKey]);
 
   // Auto-save handover progress locally as the volunteer types.
   useEffect(() => {
-    if (!dirty) return;
+    if (!dirty || !canWrite) return;
     const t = setTimeout(() => localStorage.setItem(draftKey, JSON.stringify(fb)), 500);
     return () => clearTimeout(t);
-  }, [fb, dirty, draftKey]);
+  }, [fb, dirty, draftKey, canWrite]);
 
   // Remind the volunteer before leaving with unsaved notes.
   const blocker = useBlocker({
-    shouldBlockFn: () => dirty,
+    shouldBlockFn: () => dirty && canWrite,
     withResolver: true,
-    enableBeforeUnload: dirty,
-    disabled: !dirty,
+    enableBeforeUnload: dirty && canWrite,
+    disabled: !dirty || !canWrite,
   });
 
   if (isLoading) return <p className="text-muted-foreground">Loading…</p>;
@@ -112,7 +124,14 @@ function SessionPage() {
   const { s, words, hf, books } = data;
   const template = s.session_templates as { name: string; total_minutes: number; blocks: { type: string; minutes: number }[] } | null;
   const isOwner = s.volunteer_id === me?.id;
-  const canWrite = isOwner || me?.isAdmin;
+
+  if (s.status === "in_progress" && !canWrite) return (
+    <section className="space-y-3">
+      <h1 className="text-2xl font-bold">Session assigned to another volunteer</h1>
+      <p className="text-muted-foreground">Only the assigned volunteer can continue this session. Ask programme staff to transfer it in Admin.</p>
+      <Button asChild variant="outline"><Link to="/children/$childId" params={{ childId: s.child_id }}>Back to child record</Link></Button>
+    </section>
+  );
 
   const updateFb = (next: Feedback) => {
     setFb(next);
@@ -121,7 +140,7 @@ function SessionPage() {
 
   async function addWord(e: FormEvent) {
     e.preventDefault();
-    if (!word.trim() || !s) return;
+    if (!word.trim() || !s || !canWrite) return;
     const { error } = await supabase.from("tricky_words").insert({ child_id: s.child_id, session_id: sessionId, word: word.trim() });
     if (error) { toast.error(friendlySaveError(error.message)); return; }
     setWord("");
@@ -129,12 +148,14 @@ function SessionPage() {
   }
 
   async function toggleMastered(id: string, mastered: boolean) {
+    if (!canWrite) return;
     const { error } = await supabase.from("tricky_words").update({ mastered }).eq("id", id);
     if (error) { toast.error(friendlySaveError(error.message)); return; }
     qc.invalidateQueries({ queryKey: key });
   }
 
   async function saveWordEdit(id: string) {
+    if (!canWrite) return;
     const text = editWordText.trim();
     if (!text) return;
     const { error } = await supabase.from("tricky_words").update({ word: text }).eq("id", id);
@@ -144,6 +165,7 @@ function SessionPage() {
   }
 
   async function pickBook(bookId: string) {
+    if (!canWrite) return;
     const { error } = await supabase.from("sessions").update({ book_id: bookId }).eq("id", sessionId);
     if (error) { toast.error(friendlySaveError(error.message)); return; }
     toast.success("Book chosen for this session.");
@@ -154,11 +176,12 @@ function SessionPage() {
     const { error } = await supabase.from("sessions").delete().eq("id", sessionId);
     if (error) { toast.error(friendlySaveError(error.message)); return; }
     toast.success("Session deleted.");
-    navigate({ to: "/children/$childId", params: { childId: s!.child_id } });
+    navigate({ to: "/children/$childId", params: { childId: s.child_id } });
   }
 
   async function finish(e: FormEvent) {
     e.preventDefault();
+    if (!canWrite || busy) return;
     if (!fb.worked_well.trim() || !fb.try_next.trim()) {
       toast.error("Please fill in “What worked well” and “Note for the next volunteer” before saving.");
       return;
@@ -255,7 +278,7 @@ function SessionPage() {
         </section>
       )}
 
-      {s.books && <SessionStory bookId={s.books.id} sessionId={sessionId} title={s.books.title} />}
+      {s.books && <SessionStory bookId={s.books.id} sessionId={sessionId} title={s.books.title} canWrite={Boolean(canWrite)} />}
 
       <section className="border-t-4 border-story-coral bg-secondary p-5">
         <h2 className="text-xl font-semibold">Tricky words</h2>

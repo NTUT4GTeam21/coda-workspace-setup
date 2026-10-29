@@ -6,6 +6,7 @@ Every change made by Claude Code or Lovable adds one line here.
 Format: `- YYYY-MM-DD · <module> · <what changed> (<author or "Lovable">)`
 
 ## Unreleased
+- 2026-10-29 · admin · Staff can transfer ongoing sessions to another assigned, qualified volunteer; volunteers cannot continue or save another volunteer's ongoing session (Lovable).
 - 2026-10-27 · Library · Added illustrated covers for every book (Lovable)
 
 - 2026-10-28 · guide · Guide progress now saves across refreshes, qualification expires after a year or 6 months without signing in, and volunteers can practise the quiz any time (Lovable)
