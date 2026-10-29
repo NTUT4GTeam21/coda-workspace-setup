@@ -61,7 +61,7 @@ function StoryText({ text, words, onWord }: { text: string; words: WordCardData[
   );
 }
 
-function Quiz({ questions, sessionId }: { questions: QuizQuestion[]; sessionId: string }) {
+function Quiz({ questions, sessionId, canWrite }: { questions: QuizQuestion[]; sessionId: string; canWrite: boolean }) {
   const qc = useQueryClient();
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [saved, setSaved] = useState(false);
@@ -91,6 +91,8 @@ function Quiz({ questions, sessionId }: { questions: QuizQuestion[]; sessionId: 
       </section>
     );
   }
+
+  if (!canWrite) return null;
 
   const allAnswered = questions.every((_, i) => (answers[i] ?? "").trim());
 
@@ -172,7 +174,7 @@ function Quiz({ questions, sessionId }: { questions: QuizQuestion[]; sessionId: 
  * The in-session reading experience: the story with tappable key words, the
  * CROWD prompts under the story and in a floating panel, and the end quiz.
  */
-export function SessionStory({ bookId, sessionId, title }: { bookId: string; sessionId: string; title: string }) {
+export function SessionStory({ bookId, sessionId, title, canWrite = false }: { bookId: string; sessionId: string; title: string; canWrite?: boolean }) {
   const [page, setPage] = useState(0);
   const [wordIdx, setWordIdx] = useState<number | null>(null);
   const [pipOpen, setPipOpen] = useState(false);
@@ -241,7 +243,7 @@ export function SessionStory({ bookId, sessionId, title }: { bookId: string; ses
         </section>
       )}
 
-      {quiz.length > 0 && <Quiz questions={quiz} sessionId={sessionId} />}
+      {quiz.length > 0 && <Quiz questions={quiz} sessionId={sessionId} canWrite={canWrite} />}
 
       <WordCardDialog cards={words} openIdx={wordIdx} onClose={() => setWordIdx(null)} onNavigate={setWordIdx} />
 

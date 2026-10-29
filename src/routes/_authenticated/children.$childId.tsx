@@ -79,6 +79,7 @@ function ChildPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["child", childId],
+    refetchInterval: 15000,
     queryFn: async () => {
       const [child, sessions, words, books, templates] = await Promise.all([
         supabase.from("children").select("*").eq("id", childId).maybeSingle(),
@@ -217,9 +218,9 @@ function ChildPage() {
         {inProgress ? (
           <div className="mt-3">
             <p className="text-sm text-muted-foreground">A session is already in progress for {child.nickname}.</p>
-            <Button className="mt-2 min-h-11" onClick={() => navigate({ to: "/sessions/$sessionId", params: { sessionId: inProgress.id } })}>
+            {canContinueSession(inProgress.volunteer_id, me?.id, me?.isAdmin) ? <Button className="mt-2 min-h-11" onClick={() => navigate({ to: "/sessions/$sessionId", params: { sessionId: inProgress.id } })}>
               <Play className="h-4 w-4" aria-hidden /> Continue the session from {new Date(inProgress.scheduled_at).toLocaleDateString()}
-            </Button>
+            </Button> : <p className="mt-2 text-sm text-muted-foreground">This session belongs to {inProgress.profiles?.full_name || "another volunteer"}. Ask programme staff to transfer it before continuing.</p>}
           </div>
         ) : (
           <div className="mt-3 space-y-4">
