@@ -30,11 +30,13 @@ export function AdminSessionTransfers() {
     },
   });
   const selected = data?.sessions.find((s) => s.id === confirmId);
-  const name = (id: string) => data?.profiles.find((p) => p.id === id)?.full_name || "Unnamed volunteer";
+  const name = (id: string | undefined) => data?.profiles.find((p) => p.id === id)?.full_name || "Unnamed volunteer";
   async function transfer() {
-    if (!selected || busy || !choices[selected.id]) return;
+    if (!selected || busy) return;
+    const volunteerId = choices[selected.id];
+    if (!volunteerId) return;
     setBusy(true);
-    const { error } = await supabase.rpc("transfer_ongoing_session", { _session_id: selected.id, _volunteer_id: choices[selected.id], _expected_volunteer_id: selected.volunteer_id });
+    const { error } = await supabase.rpc("transfer_ongoing_session", { _session_id: selected.id, _volunteer_id: volunteerId, _expected_volunteer_id: selected.volunteer_id });
     setBusy(false);
     if (error) { toast.error(error.message); qc.invalidateQueries({ queryKey: ["admin-session-transfers"] }); return; }
     setConfirmId(null);
