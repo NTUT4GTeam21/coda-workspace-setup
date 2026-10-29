@@ -148,12 +148,14 @@ function SessionPage() {
   }
 
   async function toggleMastered(id: string, mastered: boolean) {
+    if (!canWrite) return;
     const { error } = await supabase.from("tricky_words").update({ mastered }).eq("id", id);
     if (error) { toast.error(friendlySaveError(error.message)); return; }
     qc.invalidateQueries({ queryKey: key });
   }
 
   async function saveWordEdit(id: string) {
+    if (!canWrite) return;
     const text = editWordText.trim();
     if (!text) return;
     const { error } = await supabase.from("tricky_words").update({ word: text }).eq("id", id);
@@ -163,6 +165,7 @@ function SessionPage() {
   }
 
   async function pickBook(bookId: string) {
+    if (!canWrite) return;
     const { error } = await supabase.from("sessions").update({ book_id: bookId }).eq("id", sessionId);
     if (error) { toast.error(friendlySaveError(error.message)); return; }
     toast.success("Book chosen for this session.");

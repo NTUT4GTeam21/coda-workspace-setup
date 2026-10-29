@@ -106,7 +106,8 @@ function ChildPage() {
     .filter((s) => s.status === COMPLETED_SESSION_STATUS && hfArray(s.handover_feedback).length > 0)
     .map((s) => hfArray(s.handover_feedback)[0]!.level_fit);
   const fitHint = levelFitHint(recentFits);
-  const inProgress = sessions.find((s) => s.status === "in_progress");
+  const inProgress = sessions.find((s) => s.status === "in_progress" && s.volunteer_id === me?.id)
+    ?? sessions.find((s) => s.status === "in_progress");
 
   const readBookIds = new Set(sessions.filter((s) => s.book_id).map((s) => s.book_id as string));
   const targetLevel = suggestedLevel(child.current_level, recentFits);

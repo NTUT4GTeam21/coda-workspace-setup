@@ -1,7 +1,7 @@
 # Current tasks
 
-- [ ] Add staff-only ongoing session transfers in Admin and enforce volunteer ownership across continuation, notes and quiz writes.
-- [ ] Verify transfers and blocked access, then update team trackers.
+- [x] Add staff-only ongoing session transfers in Admin and enforce volunteer ownership across continuation, notes and quiz writes.
+- [x] Verify staff transfer and refreshed ownership with a fake test session (removed); ownership unit tests passed; team trackers updated.
 
 - [x] Add forgot/reset password for all users.
 - [x] Update last sign-in on restored sessions, not only fresh password sign-ins.

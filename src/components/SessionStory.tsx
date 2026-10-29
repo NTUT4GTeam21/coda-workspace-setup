@@ -97,7 +97,7 @@ function Quiz({ questions, sessionId, canWrite }: { questions: QuizQuestion[]; s
   const allAnswered = questions.every((_, i) => (answers[i] ?? "").trim());
 
   async function save() {
-    if (busy) return;
+    if (busy || !canWrite) return;
     setBusy(true);
     const rows = questions.map((q, i) => ({
       session_id: sessionId,
