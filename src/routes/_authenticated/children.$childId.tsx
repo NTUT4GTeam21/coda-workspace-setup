@@ -8,7 +8,7 @@ import { useMe, LEVEL_LABELS } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { COMPLETED_SESSION_STATUS, sessionStatusLabel } from "@/lib/session-status";
+import { canContinueSession, COMPLETED_SESSION_STATUS, sessionStatusLabel } from "@/lib/session-status";
 import { levelFitHint } from "@/lib/level-hint";
 import { finishedBookLabel, friendlySaveError, levelFitLabel } from "@/lib/labels";
 import { pickSuggestions, suggestedLevel, suggestionReason } from "@/lib/book-suggestions";
@@ -33,6 +33,7 @@ type HF = {
 
 type SessionRow = {
   id: string;
+  volunteer_id: string;
   scheduled_at: string;
   status: string;
   book_id: string | null;
@@ -81,7 +82,7 @@ function ChildPage() {
     queryFn: async () => {
       const [child, sessions, words, books, templates] = await Promise.all([
         supabase.from("children").select("*").eq("id", childId).maybeSingle(),
-        supabase.from("sessions").select("id, scheduled_at, status, book_id, books(title), profiles(full_name), handover_feedback(*)").eq("child_id", childId).order("scheduled_at", { ascending: false }),
+        supabase.from("sessions").select("id, volunteer_id, scheduled_at, status, book_id, books(title), profiles(full_name), handover_feedback(*)").eq("child_id", childId).order("scheduled_at", { ascending: false }),
         supabase.from("tricky_words").select("id, word, mastered").eq("child_id", childId).order("created_at", { ascending: false }),
         supabase.from("books").select("id, title, level, summary").eq("status", "approved").order("level").order("title"),
         supabase.from("session_templates").select("id, name, total_minutes").order("total_minutes"),

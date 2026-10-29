@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AdminSessionTransfers } from "@/components/AdminSessionTransfers";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -122,6 +123,8 @@ function Admin() {
           ))}
         </div>
       </section>
+
+      <AdminSessionTransfers />
 
       <section>
         <h2 className="text-xl font-semibold">Content to review</h2>
