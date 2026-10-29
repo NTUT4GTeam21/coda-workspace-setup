@@ -706,6 +706,7 @@ export type Database = {
         Returns: undefined
       }
       can_access_child: { Args: { _child_id: string }; Returns: boolean }
+      can_manage_session: { Args: { _session_id: string }; Returns: boolean }
       can_read_content: { Args: never; Returns: boolean }
       change_child_level: {
         Args: { _child_id: string; _new_level: number; _reason: string }
@@ -738,6 +739,14 @@ export type Database = {
         Returns: Json
       }
       touch_last_login: { Args: never; Returns: undefined }
+      transfer_ongoing_session: {
+        Args: {
+          _expected_volunteer_id: string
+          _session_id: string
+          _volunteer_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "volunteer" | "viewer"
