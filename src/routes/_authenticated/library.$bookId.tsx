@@ -66,6 +66,8 @@ function BookDetail() {
   const [editWord, setEditWord] = useState<WordCard | null>(null);
   const [editPrompt, setEditPrompt] = useState<Prompt | null>(null);
   const [savingWord, setSavingWord] = useState(false);
+  const [override, setOverride] = useState("");
+  const openEditor = (w: WordCard) => { setEditWord(w); setOverride(w.sgsl_manual ? w.sgsl_url ?? "" : ""); };
   const saveWordFn = useServerFn(saveSgslWordCard);
 
   const { data, isLoading } = useQuery({
@@ -108,7 +110,8 @@ function BookDetail() {
         pronunciation: editWord.pronunciation.trim(),
         example_sentence: editWord.example_sentence.trim(),
         sign_bank_url: editWord.sign_bank_url?.trim() || null,
-        sgsl_url: editWord.sgsl_url?.trim() || null,
+        // Empty override keeps the automatic result; clearing a manual one re-checks.
+        sgsl_url: override.trim() || (editWord.sgsl_manual ? null : editWord.sgsl_url),
       } });
       toast.success(res.result === "failed" ? "Word card saved. The SgSL check couldn't finish – try again later." : "Word card saved");
       setEditWord(null);
@@ -178,7 +181,7 @@ function BookDetail() {
                 {w.word}
               </Button>
               {me?.isAdmin && (
-                <Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={`Edit word card ${w.word}`} onClick={() => setEditWord(w)}>
+                <Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={`Edit word card ${w.word}`} onClick={() => openEditor(w)}>
                   <Pencil className="h-4 w-4" aria-hidden />
                 </Button>
               )}
@@ -235,10 +238,10 @@ function BookDetail() {
                 <Label htmlFor="ew-ex">Example sentence</Label>
                 <Textarea id="ew-ex" value={editWord.example_sentence} onChange={(e) => setEditWord({ ...editWord, example_sentence: e.target.value })} />
               </div>
-              <SgslStatus card={editWord} onUse={(url) => setEditWord({ ...editWord, sgsl_url: url })} />
+              <SgslStatus card={editWord} onUse={setOverride} />
               <div className="space-y-1.5">
                 <Label htmlFor="ew-sgsl">SgSL sign link (override)</Label>
-                <Input id="ew-sgsl" type="url" value={editWord.sgsl_manual || editWord.sgsl_url !== (words.find((w) => w.id === editWord.id)?.sgsl_url ?? null) ? editWord.sgsl_url ?? "" : ""} placeholder="Leave empty to use the automatic check" onChange={(e) => setEditWord({ ...editWord, sgsl_url: e.target.value })} className="min-h-11" />
+                <Input id="ew-sgsl" type="url" value={override} placeholder="Leave empty to use the automatic check" onChange={(e) => setOverride(e.target.value)} className="min-h-11" />
                 <p className="text-xs text-muted-foreground">Clearing this switches back to the automatic SgSL check.</p>
               </div>
               <div className="space-y-1.5">
@@ -268,7 +271,7 @@ function BookDetail() {
 
 function SgslStatus({ card, onUse }: { card: WordCard; onUse: (url: string) => void }) {
   const box = "rounded-xl border bg-muted/40 p-3 text-sm";
-  if (card.sgsl_url && card.sgsl_checked_at !== undefined && (card.sgsl_manual || card.sgsl_checked_at)) {
+  if (card.sgsl_url) {
     return (
       <div className={box}>
         <p className="font-semibold">SgSL sign found{card.sgsl_manual ? " (set by staff)" : ""}</p>
