@@ -656,6 +656,10 @@ export type Database = {
           id: string
           image_url: string | null
           pronunciation: string
+          sgsl_candidates: string[]
+          sgsl_checked_at: string | null
+          sgsl_manual: boolean
+          sgsl_url: string | null
           sign_bank_url: string | null
           sort_order: number
           status: Database["public"]["Enums"]["content_status"]
@@ -668,6 +672,10 @@ export type Database = {
           id?: string
           image_url?: string | null
           pronunciation?: string
+          sgsl_candidates?: string[]
+          sgsl_checked_at?: string | null
+          sgsl_manual?: boolean
+          sgsl_url?: string | null
           sign_bank_url?: string | null
           sort_order?: number
           status?: Database["public"]["Enums"]["content_status"]
@@ -680,6 +688,10 @@ export type Database = {
           id?: string
           image_url?: string | null
           pronunciation?: string
+          sgsl_candidates?: string[]
+          sgsl_checked_at?: string | null
+          sgsl_manual?: boolean
+          sgsl_url?: string | null
           sign_bank_url?: string | null
           sort_order?: number
           status?: Database["public"]["Enums"]["content_status"]

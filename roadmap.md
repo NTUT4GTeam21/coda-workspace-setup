@@ -1,5 +1,8 @@
 # Current tasks
 
+- [ ] Add verified staff-only SgSL lookup, batched re-check, manual overrides and explicit ASL fallback.
+- [ ] Update guide sign wording, test detection and permissions, and run all existing words once.
+
 - [x] Add staff-only ongoing session transfers in Admin and enforce volunteer ownership across continuation, notes and quiz writes.
 - [x] Verify staff transfer and refreshed ownership with a fake test session (removed); ownership unit tests passed; team trackers updated.
 

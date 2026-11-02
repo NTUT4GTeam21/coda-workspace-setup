@@ -64,6 +64,13 @@
       "when": 1793288131473,
       "tag": "0008_staff_session_transfers",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793603399427,
+      "tag": "0009_sgsl_word_card_links",
+      "breakpoints": true
     }
   ]
 }
