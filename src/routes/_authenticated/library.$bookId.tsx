@@ -31,10 +31,17 @@ type WordCard = {
   pronunciation: string;
   example_sentence: string;
   sign_bank_url: string | null;
+  sgsl_url: string | null;
+  sgsl_manual: boolean;
+  sgsl_checked_at: string | null;
+  sgsl_candidates: string[];
 };
 type Prompt = { id: string; prompt_text: string };
 import { StoryReader } from "@/components/StoryReader";
 import { WordCardDialog } from "@/components/WordCardDialog";
+import { useServerFn } from "@tanstack/react-start";
+import { saveSgslWordCard } from "@/lib/sgsl.functions";
+import { sgslUrl } from "@/lib/sgsl";
 
 export const Route = createFileRoute("/_authenticated/library/$bookId")({
   head: () => ({ meta: [{ title: "Book · Read between the Signs" }, { name: "description", content: "Key words and discussion prompts for this book." }, { property: "og:title", content: "Book · Read between the Signs" }, { property: "og:description", content: "Key words and discussion prompts for this book." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -58,6 +65,10 @@ function BookDetail() {
   const [link, setLink] = useState("");
   const [editWord, setEditWord] = useState<WordCard | null>(null);
   const [editPrompt, setEditPrompt] = useState<Prompt | null>(null);
+  const [savingWord, setSavingWord] = useState(false);
+  const [override, setOverride] = useState("");
+  const openEditor = (w: WordCard) => { setEditWord(w); setOverride(w.sgsl_manual ? w.sgsl_url ?? "" : ""); };
+  const saveWordFn = useServerFn(saveSgslWordCard);
 
   const { data, isLoading } = useQuery({
     queryKey: ["book", bookId],
@@ -90,17 +101,26 @@ function BookDetail() {
 
   async function saveWord() {
     if (!editWord) return;
-    const { error } = await supabase.from("word_cards").update({
-      word: editWord.word.trim(),
-      definition: editWord.definition.trim(),
-      pronunciation: editWord.pronunciation.trim(),
-      example_sentence: editWord.example_sentence.trim(),
-      sign_bank_url: editWord.sign_bank_url?.trim() || null,
-    }).eq("id", editWord.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Word card saved");
-    setEditWord(null);
-    qc.invalidateQueries({ queryKey: ["book", bookId] });
+    setSavingWord(true);
+    try {
+      const res = await saveWordFn({ data: {
+        id: editWord.id, bookId,
+        word: editWord.word.trim(),
+        definition: editWord.definition.trim(),
+        pronunciation: editWord.pronunciation.trim(),
+        example_sentence: editWord.example_sentence.trim(),
+        sign_bank_url: editWord.sign_bank_url?.trim() || null,
+        // Empty override keeps the automatic result; clearing a manual one re-checks.
+        sgsl_url: override.trim() || (editWord.sgsl_manual ? null : editWord.sgsl_url),
+      } });
+      toast.success(res.result === "failed" ? "Word card saved. The SgSL check couldn't finish – try again later." : "Word card saved");
+      setEditWord(null);
+      qc.invalidateQueries({ queryKey: ["book", bookId] });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Word card could not be saved.");
+    } finally {
+      setSavingWord(false);
+    }
   }
 
   async function savePrompt() {
@@ -161,7 +181,7 @@ function BookDetail() {
                 {w.word}
               </Button>
               {me?.isAdmin && (
-                <Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={`Edit word card ${w.word}`} onClick={() => setEditWord(w)}>
+                <Button variant="ghost" size="icon" className="min-h-11 min-w-11" aria-label={`Edit word card ${w.word}`} onClick={() => openEditor(w)}>
                   <Pencil className="h-4 w-4" aria-hidden />
                 </Button>
               )}
@@ -218,11 +238,17 @@ function BookDetail() {
                 <Label htmlFor="ew-ex">Example sentence</Label>
                 <Textarea id="ew-ex" value={editWord.example_sentence} onChange={(e) => setEditWord({ ...editWord, example_sentence: e.target.value })} />
               </div>
+              <SgslStatus card={editWord} onUse={setOverride} />
               <div className="space-y-1.5">
-                <Label htmlFor="ew-sign">Sign link (SignASL.org)</Label>
+                <Label htmlFor="ew-sgsl">SgSL sign link (override)</Label>
+                <Input id="ew-sgsl" type="url" value={override} placeholder="Leave empty to use the automatic check" onChange={(e) => setOverride(e.target.value)} className="min-h-11" />
+                <p className="text-xs text-muted-foreground">Clearing this switches back to the automatic SgSL check.</p>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="ew-sign">ASL sign link (fallback)</Label>
                 <Input id="ew-sign" type="url" value={editWord.sign_bank_url ?? ""} onChange={(e) => setEditWord({ ...editWord, sign_bank_url: e.target.value })} className="min-h-11" />
               </div>
-              <Button className="min-h-11 w-full" onClick={saveWord}>Save word card</Button>
+              <Button className="min-h-11 w-full" onClick={saveWord} disabled={savingWord}>{savingWord ? "Saving and checking SgSL…" : "Save word card"}</Button>
             </div>
           )}
         </DialogContent>
@@ -241,4 +267,35 @@ function BookDetail() {
       </Dialog>
     </div>
   );
+}
+
+function SgslStatus({ card, onUse }: { card: WordCard; onUse: (url: string) => void }) {
+  const box = "rounded-xl border bg-muted/40 p-3 text-sm";
+  if (card.sgsl_url) {
+    return (
+      <div className={box}>
+        <p className="font-semibold">SgSL sign found{card.sgsl_manual ? " (set by staff)" : ""}</p>
+        <a href={card.sgsl_url} target="_blank" rel="noreferrer" className="break-all text-primary underline">{card.sgsl_url}</a>
+      </div>
+    );
+  }
+  if (card.sgsl_candidates.length) {
+    return (
+      <div className={box}>
+        <p className="font-semibold">Possible SgSL match – needs staff review</p>
+        <ul className="mt-2 space-y-2">
+          {card.sgsl_candidates.map((c) => (
+            <li key={c} className="flex flex-wrap items-center justify-between gap-2">
+              <a href={sgslUrl(c)} target="_blank" rel="noreferrer" className="text-primary underline">{c}</a>
+              <Button type="button" size="sm" variant="outline" className="min-h-11" onClick={() => onUse(sgslUrl(c))}>Use this sign</Button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+  if (card.sgsl_checked_at) {
+    return <p className={box}>No SgSL sign found (checked {new Date(card.sgsl_checked_at).toLocaleDateString("en-SG", { day: "numeric", month: "short", year: "numeric" })})</p>;
+  }
+  return <p className={box}>Not checked yet</p>;
 }

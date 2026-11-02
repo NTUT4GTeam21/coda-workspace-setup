@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AdminSessionTransfers } from "@/components/AdminSessionTransfers";
+import { AdminSgslRecheck } from "@/components/AdminSgslRecheck";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -125,6 +126,8 @@ function Admin() {
       </section>
 
       <AdminSessionTransfers />
+
+      <AdminSgslRecheck />
 
       <section>
         <h2 className="text-xl font-semibold">Content to review</h2>

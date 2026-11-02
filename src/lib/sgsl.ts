@@ -7,17 +7,21 @@ export function sgslUrl(word: string) {
   const trimmed = word.trim();
   return `${SGSL_BASE}word/?frm-word=${encodeURIComponent(trimmed.charAt(0).toUpperCase() + trimmed.slice(1))}`;
 }
-export function detectSgsl(html: string, word: string): "found" | "missing" | "failed" {
+export type SgslDetection = { kind: "found" | "possible" | "missing" | "failed"; headings: string[] };
+export function detectSgsl(html: string, word: string): SgslDetection {
   const { document } = parseHTML(html);
   document.querySelectorAll("script,style").forEach((node) => node.remove());
   const text = document.documentElement.textContent ?? "";
   // The site's entry is h1.h3; h1.entry-title is only the generic “Word” page title.
-  const headingMatches = Array.from(document.querySelectorAll("h1.h3")).some(
-    (heading) => normaliseWord(heading.textContent ?? "") === normaliseWord(word),
-  );
-  if (/description of sign/i.test(text) && headingMatches) return "found";
-  if (/no entries found/i.test(text)) return "missing";
-  return "failed";
+  const headings = [...new Set(Array.from(document.querySelectorAll("h1.h3")).map((h) => (h.textContent ?? "").trim()).filter(Boolean))];
+  if (/description of sign/i.test(text)) {
+    if (headings.some((h) => normaliseWord(h) === normaliseWord(word))) return { kind: "found", headings: [] };
+    // A sign page with variant headings (e.g. "Light (Noun)", "Light 2") needs staff review.
+    if (headings.length) return { kind: "possible", headings };
+    return { kind: "failed", headings: [] };
+  }
+  if (/no entries found/i.test(text)) return { kind: "missing", headings: [] };
+  return { kind: "failed", headings: [] };
 }
 export function parseSgslList(html: string): string[] | null {
   const { document } = parseHTML(html);
