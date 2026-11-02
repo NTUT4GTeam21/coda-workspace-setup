@@ -34,7 +34,7 @@ Status: Not started · In progress · Done · Blocked
 | Session planner with templates | Should | Chloe | Done | 30/45/60-min picker when starting; step list on the session page |
 | Quick tricky-word capture | Should | Chloe | Done | Learned ticks, spelling corrections and automatic de-duplication |
 | Short post-session feedback | Should | Chloe | Done | Compulsory notes that auto-save as you type, with a leave reminder |
-| SgSL Sign Bank links for key words | Should | Tanya | Not started | |
+| SgSL Sign Bank links for key words | Should | Tanya | In progress | Fields and initial staff-only server checks added; read-only audit complete; screens and write-back paused pending approval |
 | Recap and end-of-session quiz | Could | Chloe | Done | Quick Recap flip cards before sessions; 2–3 question story quiz saved to history |
 | Volunteer-set level | Could | Zong Nan | Done | Volunteers change level 1–3 with a reason; recent level-fit marks shown as a hint |
 
@@ -54,6 +54,7 @@ _Update when folders or key files are added, moved or removed._
   /assets       generated reading-garden and Bao illustrations
   /routes       one file per page (index, auth, reset-password, _authenticated/dashboard, library, admin, guide, children.$childId, sessions.$sessionId)
   /lib          shared helpers (auth.ts: current user + level labels; quiz-feedback.ts; session-status.ts; signup-errors.ts; level-hint.ts; labels.ts: readable labels + friendly save errors; book-suggestions.ts; quiz-builder.ts)
+                sgsl.ts / sgsl.server.ts / sgsl.functions.ts: exact sign detection and staff-only checks
   /test         routing, quiz feedback, session status, sign-up error, level hint, labels, book suggestion and quiz builder checks
   /integrations backend connection (auto-generated, do not edit)
 ```

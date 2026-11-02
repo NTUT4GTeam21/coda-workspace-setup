@@ -29,8 +29,9 @@ export const checkSgslBatch = createServerFn({ method: "POST" })
     if (error) throw new Error("Word cards could not load.");
     for (const word of [...new Set(data.words.map(normaliseWord))]) {
       const matches = (cards ?? []).filter((card) => normaliseWord(card.word) === word);
-      if (!matches.length) continue;
-      const result = await checkSgslWord(matches[0].word, data.list);
+      const firstMatch = matches[0];
+      if (!firstMatch) continue;
+      const result = await checkSgslWord(firstMatch.word, data.list);
       const patch = sgslPatch(result, false, new Date().toISOString());
       if (patch) {
         // Re-check manual flag and original word at write time to protect concurrent staff edits.
