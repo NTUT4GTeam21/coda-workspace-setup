@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
+- SgSL lookups run in staff-authenticated server functions with sequential NTU requests and exact entry validation; failed fetches and manual overrides are never automatically overwritten.
 - Access control lives in the database (RLS + security-definer helpers `has_role`, `is_qualified`, `can_access_child`); UI checks are cosmetic only, so the qualification gate cannot be bypassed.
 - Signed-in pages live under `src/routes/_authenticated/` (client-only gate); public pages stay top-level so they can be server-rendered.
 - Roles live only in `user_roles`; admin-only changes go through security-definer RPCs that check `has_role`, so volunteers can't edit their own role or qualification.

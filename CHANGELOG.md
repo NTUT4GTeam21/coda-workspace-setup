@@ -6,6 +6,7 @@ Every change made by Claude Code or Lovable adds one line here.
 Format: `- YYYY-MM-DD · <module> · <what changed> (<author or "Lovable">)`
 
 ## Unreleased
+- 2026-11-02 · library · Added initial SgSL check fields and staff-only lookup helpers; corrected a preview typecheck error; remaining SgSL screens and write-back await approval (Lovable)
 - 2026-10-29 · admin · Staff can transfer ongoing sessions to another assigned, qualified volunteer; volunteers cannot continue or save another volunteer's ongoing session (Lovable).
 - 2026-10-27 · Library · Added illustrated covers for every book (Lovable)
 
