@@ -25,7 +25,7 @@ export function AdminSgslReview() {
     queryFn: async () => {
       const { data, error } = await supabase.from("word_cards")
         .select("id, book_id, word, definition, pronunciation, example_sentence, sign_bank_url, sgsl_candidates, books(title)")
-        .is("sgsl_url", null).eq("sgsl_manual", false).neq("sgsl_candidates", "{}");
+        .is("sgsl_url", null).eq("sgsl_manual", false);
       if (error) throw error;
       return (data ?? []).filter((c) => c.sgsl_candidates.length)
         .sort((a, b) => (a.books?.title ?? "").localeCompare(b.books?.title ?? "") || a.word.localeCompare(b.word));
