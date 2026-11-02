@@ -81,3 +81,17 @@ export const saveSgslWordCard = createServerFn({ method: "POST" })
     }
     return { result };
   });
+export const rejectSgslCandidates = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(z.object({ id: z.string().uuid() }))
+  .handler(async ({ context, data }) => {
+    const role = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (role.error) throw new Error("Staff access could not be verified.");
+    assertSgslStaff(role.data);
+    // Manual + empty link keeps the ASL fallback and stops automatic re-checks restoring candidates.
+    const saved = await context.supabase.from("word_cards")
+      .update({ sgsl_manual: true, sgsl_url: null, sgsl_candidates: [] })
+      .eq("id", data.id).select("id").single();
+    if (saved.error || !saved.data) throw new Error("Word card could not be saved.");
+    return { ok: true };
+  });

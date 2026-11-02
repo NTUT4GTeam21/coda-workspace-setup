@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AdminSessionTransfers } from "@/components/AdminSessionTransfers";
 import { AdminSgslRecheck } from "@/components/AdminSgslRecheck";
+import { AdminSgslReview } from "@/components/AdminSgslReview";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -153,6 +154,8 @@ function Admin() {
           ))}
         </ul>
       </section>
+
+      <AdminSgslReview />
 
       <section>
         <h2 className="text-xl font-semibold">Concerns</h2>
