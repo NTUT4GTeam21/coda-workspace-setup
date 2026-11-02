@@ -18,9 +18,13 @@ export async function loadSgslList() {
 export async function checkSgslWord(word: string, list: string[] | null): Promise<SgslResult> {
   const url = sgslUrl(word);
   const html = await fetchSignbank(url);
-  const detection = html === null ? "failed" : detectSgsl(html, word);
-  if (detection === "found") return { kind: "found", url, candidates: [] };
-  if (detection === "failed" || list === null) return { kind: "failed", url: null, candidates: [] };
+  const detection = html === null ? { kind: "failed" as const, headings: [] } : detectSgsl(html, word);
+  if (detection.kind === "found") return { kind: "found", url, candidates: [] };
+  if (detection.kind === "failed") return { kind: "failed", url: null, candidates: [] };
+  if (detection.kind === "possible") {
+    return { kind: "possible", url: null, candidates: [...new Set([...detection.headings, ...(list ? sgslCandidates(word, list) : [])])] };
+  }
+  if (list === null) return { kind: "failed", url: null, candidates: [] };
   const candidates = sgslCandidates(word, list);
   return { kind: candidates.length ? "possible" : "missing", url: null, candidates };
 }
