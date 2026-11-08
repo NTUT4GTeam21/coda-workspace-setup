@@ -6,6 +6,7 @@ Every change made by Claude Code or Lovable adds one line here.
 Format: `- YYYY-MM-DD · <module> · <what changed> (<author or "Lovable">)`
 
 ## Unreleased
+- 2026-11-08 · login · Show specific sign-up messages for masked code errors, email rate limits and weak passwords; confirmed shared codes remain reusable (Lovable)
 - 2026-11-02 · Admin · Add staff-only "SgSL signs to review" section to accept a candidate sign or mark none fit (Lovable)
 - 2026-11-02 · library · Word cards show "See the SgSL sign" or a labelled ASL fallback; staff editor shows SgSL status, possible matches and an override; Admin has "Re-check SgSL signs"; variant sign pages become possible matches; first full check saved (Lovable)
 - 2026-11-02 · library · Added initial SgSL check fields and staff-only lookup helpers; corrected a preview typecheck error; remaining SgSL screens and write-back await approval (Lovable)
