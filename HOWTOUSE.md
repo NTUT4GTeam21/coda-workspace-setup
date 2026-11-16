@@ -10,11 +10,11 @@ The website works. The programme around it is not ready. Volunteers can sign up,
 
 The project has three parts, and you need access to each one.
 
-| Part | What it is | Who to ask |
-| --- | --- | --- |
-| This GitHub repository | All the code, the database migrations and the documents | An owner of the `NTUT4GTeam21` organisation |
-| The Lovable project "Coda Start Foundation" | The AI builder that wrote most of the code. It also hosts the live site and the database (Lovable Cloud) | The owner of the Lovable workspace, Elina in Team 21 |
-| A staff account on the site | Lets you see the Admin page and edit content | Any existing staff user, who can make you a staff sign-up code |
+| Part                                        | What it is                                                                                               | Who to ask                                                     |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| This GitHub repository                      | All the code, the database migrations and the documents                                                  | An owner of the `NTUT4GTeam21` organisation                    |
+| The Lovable project "Coda Start Foundation" | The AI builder that wrote most of the code. It also hosts the live site and the database (Lovable Cloud) | The owner of the Lovable workspace, Elina in Team 21           |
+| A staff account on the site                 | Lets you see the Admin page and edit content                                                             | Any existing staff user, who can make you a staff sign-up code |
 
 Without Lovable access you can still read and change the code, but you cannot publish the site or look at the live database.
 
@@ -50,11 +50,11 @@ Your local copy talks to the live database. The committed `.env` points at the r
 
 Before you change anything, confirm that these three commands behave as described. If they do not, fix that first.
 
-| Command | Expected result on 16 Nov 2026 |
-| --- | --- |
-| `npm run build` | Finishes without errors |
-| `npm run test` | 47 of 47 tests pass |
-| `npm run lint` | 774 formatting errors, all inside `src/integrations/`. That folder is auto-generated and is left alone on purpose. Any error outside it is yours to fix |
+| Command         | Expected result on 16 Nov 2026                                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run build` | Finishes without errors                                                                                                                                 |
+| `npm run test`  | 47 of 47 tests pass                                                                                                                                     |
+| `npm run lint`  | 774 formatting errors, all inside `src/integrations/`. That folder is auto-generated and is left alone on purpose. Any error outside it is yours to fix |
 
 ## How the pieces fit together
 
@@ -68,10 +68,10 @@ The database lives in Lovable Cloud, which is Supabase underneath. Its structure
 
 There are two routes. Pick one per change and tell your group which. Our advice is to use a branch for anything that touches logic and to keep Lovable for database changes and new screens. If your group has nobody comfortable with Git, Lovable alone will still work, but read every commit it makes.
 
-| Route | Good for | Watch out for |
-| --- | --- | --- |
-| Prompt Lovable | New pages, anything that needs a database change, quick visual changes | It commits to `main` with no review. Of the 127 commits we handed over, most carry the message "Changes", so the Git history will not tell you what happened. CHANGELOG.md will |
-| Edit the code (by hand or with Claude Code) on a branch | Bug fixes, careful changes to logic, anything you want reviewed | You must open a pull request, and someone must publish from Lovable after it merges |
+| Route                                                   | Good for                                                               | Watch out for                                                                                                                                                                   |
+| ------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prompt Lovable                                          | New pages, anything that needs a database change, quick visual changes | It commits to `main` with no review. Of the 127 commits we handed over, most carry the message "Changes", so the Git history will not tell you what happened. CHANGELOG.md will |
+| Edit the code (by hand or with Claude Code) on a branch | Bug fixes, careful changes to logic, anything you want reviewed        | You must open a pull request, and someone must publish from Lovable after it merges                                                                                             |
 
 Whichever route you take, the steps around it are the same.
 
@@ -86,14 +86,14 @@ Whichever route you take, the steps around it are the same.
 
 ### Where things are
 
-| You want to change | Look in |
-| --- | --- |
-| A page | `src/routes/`. Signed-in pages are under `_authenticated/` |
-| A shared piece of a page (header, story reader, word pop-up) | `src/components/` |
-| Logic with no screen (labels, quiz building, book suggestions, SgSL lookup) | `src/lib/`, with its tests in `src/test/` |
-| Colours and fonts | `src/styles.css` |
-| Buttons, dialogs and other basic controls | `src/components/ui/`. These are shadcn/ui parts. Reuse them and do not add another UI library |
-| Database tables or access rules | Ask Lovable. See the next section |
+| You want to change                                                          | Look in                                                                                       |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| A page                                                                      | `src/routes/`. Signed-in pages are under `_authenticated/`                                    |
+| A shared piece of a page (header, story reader, word pop-up)                | `src/components/`                                                                             |
+| Logic with no screen (labels, quiz building, book suggestions, SgSL lookup) | `src/lib/`, with its tests in `src/test/`                                                     |
+| Colours and fonts                                                           | `src/styles.css`                                                                              |
+| Buttons, dialogs and other basic controls                                   | `src/components/ui/`. These are shadcn/ui parts. Reuse them and do not add another UI library |
+| Database tables or access rules                                             | Ask Lovable. See the next section                                                             |
 
 Do not edit `src/integrations/` or `src/routeTree.gen.ts`. Both are generated and your edits will be overwritten.
 
@@ -107,17 +107,17 @@ Never edit or delete an existing file in `drizzle/migrations/`. Those files have
 
 Most day-to-day upkeep can be done by a staff user on the site itself. This was a design choice, so that SADeaf can maintain the site after a student group leaves.
 
-| Task | Where a staff user does it |
-| --- | --- |
-| Create or cancel sign-up codes | Admin, "Sign-up codes" |
-| Make someone staff, mark them qualified, or deactivate them | Admin, "People" |
-| Add a child and assign volunteers | Admin, "Children and assignments" |
-| Read and approve a draft story | Admin, "Content to review" |
-| Read concerns raised by volunteers | Admin, "Concerns" |
-| Move an ongoing session to another volunteer | Admin, session transfers |
-| Re-check SgSL links, or accept and reject possible signs | Admin, SgSL sections |
-| Edit a book's link, word cards and prompts | The book's own page in the Library |
-| Edit a volunteer guide card | The Guide page |
+| Task                                                        | Where a staff user does it         |
+| ----------------------------------------------------------- | ---------------------------------- |
+| Create or cancel sign-up codes                              | Admin, "Sign-up codes"             |
+| Make someone staff, mark them qualified, or deactivate them | Admin, "People"                    |
+| Add a child and assign volunteers                           | Admin, "Children and assignments"  |
+| Read and approve a draft story                              | Admin, "Content to review"         |
+| Read concerns raised by volunteers                          | Admin, "Concerns"                  |
+| Move an ongoing session to another volunteer                | Admin, session transfers           |
+| Re-check SgSL links, or accept and reject possible signs    | Admin, SgSL sections               |
+| Edit a book's link, word cards and prompts                  | The book's own page in the Library |
+| Edit a volunteer guide card                                 | The Guide page                     |
 
 To get your first staff account, ask an existing staff user to create a staff code under "Sign-up codes". Sign up, tick "Programme Staff" and enter the code.
 
@@ -156,14 +156,14 @@ These come from [CLAUDE.md](CLAUDE.md). They are repeated here because breaking 
 
 ## When something goes wrong
 
-| What you see | Likely cause | What to do |
-| --- | --- | --- |
-| A fix is merged but the live site has not changed | Nobody published | In Lovable, press Publish, then Update, and reload the site |
-| A volunteer cannot see any children | They have not passed the guide quiz, their qualification has lapsed, or no child is assigned to them | Check the person and the child's assignments on the Admin page |
-| A volunteer cannot continue a session | It belongs to another volunteer | A staff user transfers it on the Admin page |
-| A save fails with a permission error | The database refused it. The page and the access rules disagree | Read the matching policy in `drizzle/migrations/` before changing any page code |
-| An SgSL re-check reports many failures | The Signbank limits fast requests, so the lookup already waits 3 seconds between words | Run the re-check again later. Failed words keep their old result |
-| `git pull` shows conflicts in `CHANGELOG.md` or `PROGRESS.md` | You and Lovable both added a line | Keep both sides' lines. Never delete another person's entry |
+| What you see                                                  | Likely cause                                                                                         | What to do                                                                      |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| A fix is merged but the live site has not changed             | Nobody published                                                                                     | In Lovable, press Publish, then Update, and reload the site                     |
+| A volunteer cannot see any children                           | They have not passed the guide quiz, their qualification has lapsed, or no child is assigned to them | Check the person and the child's assignments on the Admin page                  |
+| A volunteer cannot continue a session                         | It belongs to another volunteer                                                                      | A staff user transfers it on the Admin page                                     |
+| A save fails with a permission error                          | The database refused it. The page and the access rules disagree                                      | Read the matching policy in `drizzle/migrations/` before changing any page code |
+| An SgSL re-check reports many failures                        | The Signbank limits fast requests, so the lookup already waits 3 seconds between words               | Run the re-check again later. Failed words keep their old result                |
+| `git pull` shows conflicts in `CHANGELOG.md` or `PROGRESS.md` | You and Lovable both added a line                                                                    | Keep both sides' lines. Never delete another person's entry                     |
 
 ## Who built this
 
