@@ -6,6 +6,7 @@ Every change made by Claude Code or Lovable adds one line here.
 Format: `- YYYY-MM-DD · <module> · <what changed> (<author or "Lovable">)`
 
 ## Unreleased
+- 2026-11-16 · repo · Added HOWTOUSE.md, a handover guide for the next project group: access to ask for, local setup, how Lovable and GitHub fit together, first tasks and what caught us out (Zong Nan, with Claude Code)
 - 2026-11-16 · repo · Tidied the code with no change in behaviour: formatted the hand-edited source files with Prettier, added comments to the harder functions and removed one stale lint directive. Updated README and PROGRESS to match the site today (Zong Nan, with Claude Code)
 - 2026-11-08 · repo · Added Lovable's north-star note in `.lovable/north-star/`. Its metric is sessions completed with a saved handover note each week (Lovable)
 - 2026-11-08 · login · Show specific sign-up messages for masked code errors, email rate limits and weak passwords; confirmed shared codes remain reusable (Lovable)

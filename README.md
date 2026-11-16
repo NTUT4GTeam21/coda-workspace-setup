@@ -6,6 +6,8 @@ Built by Team 21 of the NTU Honours College Tech for Good programme, in partners
 
 _Current as of 16 Nov 2026. See [PROGRESS.md](PROGRESS.md) for feature status and [CHANGELOG.md](CHANGELOG.md) for what changed and when._
 
+Taking over this project? Start with [HOWTOUSE.md](HOWTOUSE.md).
+
 ## Why this exists
 
 Children of Deaf adults often take on interpreting and other adult responsibilities from a young age, and some develop gaps in English literacy. SADeaf runs a reading programme to support them, but volunteers rotate and spend a lot of time preparing each session.
@@ -76,7 +78,7 @@ See `package.json` for exact versions and [AGENTS.md](AGENTS.md) for the archite
 ## Repository layout
 
 ```
-/                 README, CLAUDE.md, AGENTS.md, CHANGELOG.md, PROGRESS.md, roadmap.md
+/                 README, HOWTOUSE.md, CLAUDE.md, AGENTS.md, CHANGELOG.md, PROGRESS.md, roadmap.md
 /src/routes       one file per page; signed-in pages live under _authenticated/
 /src/components   shared components; ui/ holds the shadcn/ui primitives
 /src/lib          shared helpers (auth, labels, quiz, book suggestions, SgSL lookup)
