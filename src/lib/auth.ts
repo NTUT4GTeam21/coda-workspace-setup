@@ -24,7 +24,13 @@ export function useMe() {
       const user = userData.user;
       if (!user) return null;
       const [{ data: profile }, { data: roles }] = await Promise.all([
-        supabase.from("profiles").select("full_name, qualified, requested_role, quiz_passed_at, last_login_at, guide_cards_read").eq("id", user.id).maybeSingle(),
+        supabase
+          .from("profiles")
+          .select(
+            "full_name, qualified, requested_role, quiz_passed_at, last_login_at, guide_cards_read",
+          )
+          .eq("id", user.id)
+          .maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", user.id),
       ]);
       const r = (roles ?? []).map((x) => x.role as string);
@@ -32,7 +38,11 @@ export function useMe() {
         id: user.id,
         email: user.email ?? "",
         fullName: profile?.full_name ?? "",
-        qualified: isQualificationActive(profile?.qualified ?? false, profile?.quiz_passed_at ?? null, profile?.last_login_at ?? null),
+        qualified: isQualificationActive(
+          profile?.qualified ?? false,
+          profile?.quiz_passed_at ?? null,
+          profile?.last_login_at ?? null,
+        ),
         qualifiedUntil: qualificationExpiresOn(profile?.quiz_passed_at ?? null),
         guideCardsRead: profile?.guide_cards_read ?? [],
         isAdmin: r.includes("admin"),
@@ -51,7 +61,19 @@ export const LEVEL_LABELS: Record<number, string> = {
 };
 
 export const ROLE_INFO = [
-  { id: "volunteer", label: "Volunteer", text: "Runs reading sessions with children. Needs a personal volunteer code from SADeaf and must finish the Volunteer Guide before seeing children." },
-  { id: "staff", label: "Programme Staff", text: "SADeaf staff. Sees all children, books and volunteers, creates sign-up codes and approves content. Needs a staff code from existing programme staff." },
-  { id: "viewer", label: "Viewer", text: "Can browse the book library only. No access to children or sessions." },
+  {
+    id: "volunteer",
+    label: "Volunteer",
+    text: "Runs reading sessions with children. Needs a personal volunteer code from SADeaf and must finish the Volunteer Guide before seeing children.",
+  },
+  {
+    id: "staff",
+    label: "Programme Staff",
+    text: "SADeaf staff. Sees all children, books and volunteers, creates sign-up codes and approves content. Needs a staff code from existing programme staff.",
+  },
+  {
+    id: "viewer",
+    label: "Viewer",
+    text: "Can browse the book library only. No access to children or sessions.",
+  },
 ] as const;

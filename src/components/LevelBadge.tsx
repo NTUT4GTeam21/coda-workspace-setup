@@ -9,7 +9,13 @@ const tone: Record<number, string> = {
 
 export function LevelBadge({ level, className }: { level: number; className?: string }) {
   return (
-    <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold text-foreground", tone[level], className)}>
+    <span
+      className={cn(
+        "inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold text-foreground",
+        tone[level],
+        className,
+      )}
+    >
       Level {level} · {LEVEL_LABELS[level]}
     </span>
   );

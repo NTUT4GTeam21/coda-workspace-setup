@@ -8,14 +8,27 @@ import { useMe, LEVEL_LABELS } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { canContinueSession, COMPLETED_SESSION_STATUS, sessionStatusLabel } from "@/lib/session-status";
+import {
+  canContinueSession,
+  COMPLETED_SESSION_STATUS,
+  sessionStatusLabel,
+} from "@/lib/session-status";
 import { levelFitHint } from "@/lib/level-hint";
 import { finishedBookLabel, friendlySaveError, levelFitLabel } from "@/lib/labels";
 import { pickSuggestions, suggestedLevel, suggestionReason } from "@/lib/book-suggestions";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/children/$childId")({
-  head: () => ({ meta: [{ title: "Child profile · Read between the Signs" }, { name: "description", content: "Level, tricky words and session history." }, { property: "og:title", content: "Child profile · Read between the Signs" }, { property: "og:description", content: "Level, tricky words and session history." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({
+    meta: [
+      { title: "Child profile · Read between the Signs" },
+      { name: "description", content: "Level, tricky words and session history." },
+      { property: "og:title", content: "Child profile · Read between the Signs" },
+      { property: "og:description", content: "Level, tricky words and session history." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: ChildPage,
 });
 
@@ -47,12 +60,14 @@ function hfArray(h: SessionRow["handover_feedback"]): HF[] {
   return h ? (Array.isArray(h) ? h : [h]) : [];
 }
 
+// Topic headings for the notes history. A note joins the first group whose keyword it mentions.
 const NOTE_GROUPS: { label: string; keywords: string[] }[] = [
   { label: "Level & book fit", keywords: ["level", "easy", "hard", "book"] },
   { label: "Words & signing", keywords: ["word", "sign", "vocabulary", "spell"] },
   { label: "Focus & mood", keywords: ["focus", "tired", "enjoy", "happy", "upset", "engage"] },
 ];
 
+/** Sort handover notes under topic headings by simple keyword match; unmatched go to "Other notes". */
 function groupNotes(notes: (HF & { volunteer: string; date: string })[]) {
   const groups = new Map<string, typeof notes>();
   for (const n of notes) {
@@ -83,9 +98,24 @@ function ChildPage() {
     queryFn: async () => {
       const [child, sessions, words, books, templates] = await Promise.all([
         supabase.from("children").select("*").eq("id", childId).maybeSingle(),
-        supabase.from("sessions").select("id, volunteer_id, scheduled_at, status, book_id, books(title), profiles(full_name), handover_feedback(*)").eq("child_id", childId).order("scheduled_at", { ascending: false }),
-        supabase.from("tricky_words").select("id, word, mastered").eq("child_id", childId).order("created_at", { ascending: false }),
-        supabase.from("books").select("id, title, level, summary").eq("status", "approved").order("level").order("title"),
+        supabase
+          .from("sessions")
+          .select(
+            "id, volunteer_id, scheduled_at, status, book_id, books(title), profiles(full_name), handover_feedback(*)",
+          )
+          .eq("child_id", childId)
+          .order("scheduled_at", { ascending: false }),
+        supabase
+          .from("tricky_words")
+          .select("id, word, mastered")
+          .eq("child_id", childId)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("books")
+          .select("id, title, level, summary")
+          .eq("status", "approved")
+          .order("level")
+          .order("title"),
         supabase.from("session_templates").select("id, name, total_minutes").order("total_minutes"),
       ]);
       return {
@@ -102,12 +132,15 @@ function ChildPage() {
   if (!data?.child) return <p>Child not found, or not assigned to you.</p>;
   const { child, sessions, words, books, templates } = data;
 
+  // Level-fit marks from finished sessions, newest first; these drive the level hint and book suggestions.
   const recentFits = sessions
     .filter((s) => s.status === COMPLETED_SESSION_STATUS && hfArray(s.handover_feedback).length > 0)
     .map((s) => hfArray(s.handover_feedback)[0]!.level_fit);
   const fitHint = levelFitHint(recentFits);
-  const inProgress = sessions.find((s) => s.status === "in_progress" && s.volunteer_id === me?.id)
-    ?? sessions.find((s) => s.status === "in_progress");
+  // Prefer the signed-in volunteer's own unfinished session, else anyone's, to avoid duplicates.
+  const inProgress =
+    sessions.find((s) => s.status === "in_progress" && s.volunteer_id === me?.id) ??
+    sessions.find((s) => s.status === "in_progress");
 
   const readBookIds = new Set(sessions.filter((s) => s.book_id).map((s) => s.book_id as string));
   const targetLevel = suggestedLevel(child.current_level, recentFits);
@@ -123,35 +156,59 @@ function ChildPage() {
     }));
   const lastNote = notes.find((n) => n.try_next || n.notes);
 
+  /** Change the child's reading level through an RPC that records the reason and who changed it. */
   async function changeLevel() {
     const level = newLevel || child!.current_level;
-    if (level === child!.current_level) { toast.error("Pick a different level first."); return; }
+    if (level === child!.current_level) {
+      toast.error("Pick a different level first.");
+      return;
+    }
     setBusy(true);
-    const { error } = await supabase.rpc("change_child_level", { _child_id: childId, _new_level: level, _reason: levelReason });
+    const { error } = await supabase.rpc("change_child_level", {
+      _child_id: childId,
+      _new_level: level,
+      _reason: levelReason,
+    });
     setBusy(false);
-    if (error) { toast.error(friendlySaveError(error.message)); return; }
+    if (error) {
+      toast.error(friendlySaveError(error.message));
+      return;
+    }
     toast.success(`Level updated to ${level} (${LEVEL_LABELS[level]}).`);
     setLevelReason("");
     setNewLevel(0);
     qc.invalidateQueries({ queryKey: ["child", childId] });
   }
 
+  /** Start a new session for this child. Blocked while another session is still in progress. */
   async function start() {
     if (!me || inProgress) return;
     setBusy(true);
     const { data: s, error } = await supabase
       .from("sessions")
-      .insert({ child_id: childId, volunteer_id: me.id, book_id: bookId || null, template_id: templateId || null, status: "in_progress" })
+      .insert({
+        child_id: childId,
+        volunteer_id: me.id,
+        book_id: bookId || null,
+        template_id: templateId || null,
+        status: "in_progress",
+      })
       .select("id")
       .single();
     setBusy(false);
-    if (error) { toast.error(friendlySaveError(error.message)); return; }
+    if (error) {
+      toast.error(friendlySaveError(error.message));
+      return;
+    }
     navigate({ to: "/sessions/$sessionId", params: { sessionId: s.id } });
   }
 
   async function toggleMastered(id: string, mastered: boolean) {
     const { error } = await supabase.from("tricky_words").update({ mastered }).eq("id", id);
-    if (error) { toast.error(friendlySaveError(error.message)); return; }
+    if (error) {
+      toast.error(friendlySaveError(error.message));
+      return;
+    }
     qc.invalidateQueries({ queryKey: ["child", childId] });
   }
 
@@ -159,32 +216,53 @@ function ChildPage() {
     const text = editWordText.trim();
     if (!text) return;
     const { error } = await supabase.from("tricky_words").update({ word: text }).eq("id", id);
-    if (error) { toast.error(friendlySaveError(error.message)); return; }
+    if (error) {
+      toast.error(friendlySaveError(error.message));
+      return;
+    }
     setEditWordId(null);
     qc.invalidateQueries({ queryKey: ["child", childId] });
   }
 
   const noteCard = (n: (typeof notes)[number]) => (
     <div className="rounded-xl border bg-card p-4">
-      <p className="text-sm font-semibold">{n.date} · {n.volunteer}</p>
-      <p className="mt-1 text-xs text-muted-foreground">
-        Engagement {n.engagement}/5 · Confidence {n.confidence}/5 · Level: {levelFitLabel(n.level_fit)} · Finished book: {finishedBookLabel(n.finished_book)}
+      <p className="text-sm font-semibold">
+        {n.date} · {n.volunteer}
       </p>
-      {n.worked_well && <p className="mt-2 text-sm"><strong>Worked well:</strong> {n.worked_well}</p>}
-      {n.try_next && <p className="mt-1 text-sm"><strong>Try next:</strong> {n.try_next}</p>}
+      <p className="mt-1 text-xs text-muted-foreground">
+        Engagement {n.engagement}/5 · Confidence {n.confidence}/5 · Level:{" "}
+        {levelFitLabel(n.level_fit)} · Finished book: {finishedBookLabel(n.finished_book)}
+      </p>
+      {n.worked_well && (
+        <p className="mt-2 text-sm">
+          <strong>Worked well:</strong> {n.worked_well}
+        </p>
+      )}
+      {n.try_next && (
+        <p className="mt-1 text-sm">
+          <strong>Try next:</strong> {n.try_next}
+        </p>
+      )}
       {n.notes && <p className="mt-1 text-sm">{n.notes}</p>}
     </div>
   );
 
   return (
     <div className="space-y-8">
-      <Link to="/dashboard" className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary">
+      <Link
+        to="/dashboard"
+        className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-primary"
+      >
         <ArrowLeft className="h-4 w-4" aria-hidden /> Back
       </Link>
       <header>
         <h1 className="text-3xl font-bold">{child.nickname}</h1>
-        <p className="mt-1 text-muted-foreground">Age {child.age_band} · Level {child.current_level} ({LEVEL_LABELS[child.current_level]})</p>
-        {child.communication_notes && <p className="mt-3 rounded-xl bg-muted p-3">{child.communication_notes}</p>}
+        <p className="mt-1 text-muted-foreground">
+          Age {child.age_band} · Level {child.current_level} ({LEVEL_LABELS[child.current_level]})
+        </p>
+        {child.communication_notes && (
+          <p className="mt-3 rounded-xl bg-muted p-3">{child.communication_notes}</p>
+        )}
       </header>
 
       <section className="rounded-2xl border bg-card p-5">
@@ -193,23 +271,47 @@ function ChildPage() {
         <div className="mt-3 flex flex-wrap items-end gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="new-level">New level</Label>
-            <select id="new-level" value={newLevel || child.current_level} onChange={(e) => setNewLevel(Number(e.target.value))} className="min-h-11 rounded-md border bg-background px-3">
-              {[1, 2, 3].map((l) => <option key={l} value={l}>Level {l} · {LEVEL_LABELS[l]}</option>)}
+            <select
+              id="new-level"
+              value={newLevel || child.current_level}
+              onChange={(e) => setNewLevel(Number(e.target.value))}
+              className="min-h-11 rounded-md border bg-background px-3"
+            >
+              {[1, 2, 3].map((l) => (
+                <option key={l} value={l}>
+                  Level {l} · {LEVEL_LABELS[l]}
+                </option>
+              ))}
             </select>
           </div>
           <div className="flex-1 space-y-1.5">
             <Label htmlFor="level-reason">Short reason</Label>
-            <Input id="level-reason" value={levelReason} onChange={(e) => setLevelReason(e.target.value)} placeholder="e.g. Last two books felt too easy" className="min-h-11" />
+            <Input
+              id="level-reason"
+              value={levelReason}
+              onChange={(e) => setLevelReason(e.target.value)}
+              placeholder="e.g. Last two books felt too easy"
+              className="min-h-11"
+            />
           </div>
-          <Button variant="outline" className="min-h-11" disabled={busy} onClick={changeLevel}>Update level</Button>
+          <Button variant="outline" className="min-h-11" disabled={busy} onClick={changeLevel}>
+            Update level
+          </Button>
         </div>
       </section>
 
       {lastNote && (
         <section className="rounded-2xl border-2 border-accent bg-secondary p-5 text-secondary-foreground">
           <h2 className="font-semibold">Note from the last volunteer · {lastNote.volunteer}</h2>
-          <p className="mt-1 text-sm">Level: {levelFitLabel(lastNote.level_fit)} · Finished book: {finishedBookLabel(lastNote.finished_book)}</p>
-          {lastNote.try_next && <p className="mt-1"><strong>Try next:</strong> {lastNote.try_next}</p>}
+          <p className="mt-1 text-sm">
+            Level: {levelFitLabel(lastNote.level_fit)} · Finished book:{" "}
+            {finishedBookLabel(lastNote.finished_book)}
+          </p>
+          {lastNote.try_next && (
+            <p className="mt-1">
+              <strong>Try next:</strong> {lastNote.try_next}
+            </p>
+          )}
           {lastNote.notes && <p className="mt-1">{lastNote.notes}</p>}
         </section>
       )}
@@ -218,30 +320,65 @@ function ChildPage() {
         <h2 className="text-xl font-semibold">Start a session</h2>
         {inProgress ? (
           <div className="mt-3">
-            <p className="text-sm text-muted-foreground">A session is already in progress for {child.nickname}.</p>
-            {canContinueSession(inProgress.volunteer_id, me?.id, me?.isAdmin) ? <Button className="mt-2 min-h-11" onClick={() => navigate({ to: "/sessions/$sessionId", params: { sessionId: inProgress.id } })}>
-              <Play className="h-4 w-4" aria-hidden /> Continue the session from {new Date(inProgress.scheduled_at).toLocaleDateString()}
-            </Button> : <p className="mt-2 text-sm text-muted-foreground">This session belongs to {inProgress.profiles?.full_name || "another volunteer"}. Ask programme staff to transfer it before continuing.</p>}
+            <p className="text-sm text-muted-foreground">
+              A session is already in progress for {child.nickname}.
+            </p>
+            {canContinueSession(inProgress.volunteer_id, me?.id, me?.isAdmin) ? (
+              <Button
+                className="mt-2 min-h-11"
+                onClick={() =>
+                  navigate({ to: "/sessions/$sessionId", params: { sessionId: inProgress.id } })
+                }
+              >
+                <Play className="h-4 w-4" aria-hidden /> Continue the session from{" "}
+                {new Date(inProgress.scheduled_at).toLocaleDateString()}
+              </Button>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">
+                This session belongs to {inProgress.profiles?.full_name || "another volunteer"}. Ask
+                programme staff to transfer it before continuing.
+              </p>
+            )}
           </div>
         ) : (
           <div className="mt-3 space-y-4">
             <div className="flex flex-wrap items-end gap-3">
               <div className="flex-1 space-y-1.5">
                 <Label htmlFor="book">Book</Label>
-                <select id="book" value={bookId} onChange={(e) => setBookId(e.target.value)} className="min-h-11 w-full rounded-md border bg-background px-3">
+                <select
+                  id="book"
+                  value={bookId}
+                  onChange={(e) => setBookId(e.target.value)}
+                  className="min-h-11 w-full rounded-md border bg-background px-3"
+                >
                   <option value="">Choose later</option>
-                  {books.map((b) => <option key={b.id} value={b.id}>L{b.level} · {b.title}</option>)}
+                  {books.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      L{b.level} · {b.title}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="flex-1 space-y-1.5">
                 <Label htmlFor="template">Session length</Label>
-                <select id="template" value={templateId} onChange={(e) => setTemplateId(e.target.value)} className="min-h-11 w-full rounded-md border bg-background px-3">
+                <select
+                  id="template"
+                  value={templateId}
+                  onChange={(e) => setTemplateId(e.target.value)}
+                  className="min-h-11 w-full rounded-md border bg-background px-3"
+                >
                   <option value="">No set plan</option>
-                  {templates.map((t) => <option key={t.id} value={t.id}>{t.name} · {t.total_minutes} min</option>)}
+                  {templates.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} · {t.total_minutes} min
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
-            <Button className="min-h-11" disabled={busy} onClick={start}><Play className="h-4 w-4" aria-hidden /> {busy ? "Starting…" : "Start session"}</Button>
+            <Button className="min-h-11" disabled={busy} onClick={start}>
+              <Play className="h-4 w-4" aria-hidden /> {busy ? "Starting…" : "Start session"}
+            </Button>
           </div>
         )}
       </section>
@@ -252,8 +389,14 @@ function ChildPage() {
           <ul className="mt-3 grid gap-3 sm:grid-cols-3">
             {suggestions.map((b) => (
               <li key={b.id}>
-                <Link to="/library/$bookId" params={{ bookId: b.id }} className="block h-full rounded-xl border bg-background p-4 hover:border-primary">
-                  <p className="font-semibold">L{b.level} · {b.title}</p>
+                <Link
+                  to="/library/$bookId"
+                  params={{ bookId: b.id }}
+                  className="block h-full rounded-xl border bg-background p-4 hover:border-primary"
+                >
+                  <p className="font-semibold">
+                    L{b.level} · {b.title}
+                  </p>
                   <p className="mt-1 text-sm text-muted-foreground">{b.summary}</p>
                   <p className="mt-2 text-xs font-semibold text-primary">{reason}</p>
                 </Link>
@@ -265,29 +408,62 @@ function ChildPage() {
 
       <section>
         <h2 className="text-xl font-semibold">Tricky words</h2>
-        {words.length === 0 ? <p className="mt-2 text-muted-foreground">None yet.</p> : (
+        {words.length === 0 ? (
+          <p className="mt-2 text-muted-foreground">None yet.</p>
+        ) : (
           <ul className="mt-3 flex flex-wrap gap-2">
             {words.map((w) => (
-              <li key={w.id} className="flex items-center gap-1 rounded-full border bg-card px-3 py-1">
+              <li
+                key={w.id}
+                className="flex items-center gap-1 rounded-full border bg-card px-3 py-1"
+              >
                 {editWordId === w.id ? (
                   <>
-                    <Input aria-label="Correct the word" value={editWordText} onChange={(e) => setEditWordText(e.target.value)} className="h-8 w-28" />
-                    <Button size="sm" className="min-h-8" onClick={() => saveWordEdit(w.id)}>Save</Button>
-                    <Button size="sm" variant="ghost" className="min-h-8" onClick={() => setEditWordId(null)}>Cancel</Button>
+                    <Input
+                      aria-label="Correct the word"
+                      value={editWordText}
+                      onChange={(e) => setEditWordText(e.target.value)}
+                      className="h-8 w-28"
+                    />
+                    <Button size="sm" className="min-h-8" onClick={() => saveWordEdit(w.id)}>
+                      Save
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="min-h-8"
+                      onClick={() => setEditWordId(null)}
+                    >
+                      Cancel
+                    </Button>
                   </>
                 ) : (
                   <>
-                    <span className={w.mastered ? "line-through text-muted-foreground" : ""}>{w.word}</span>
+                    <span className={w.mastered ? "line-through text-muted-foreground" : ""}>
+                      {w.word}
+                    </span>
                     <button
                       type="button"
                       onClick={() => toggleMastered(w.id, !w.mastered)}
                       aria-pressed={w.mastered}
                       aria-label={`Mark “${w.word}” as ${w.mastered ? "not learned" : "learned"}`}
-                      className={cn("ml-1 inline-flex min-h-8 items-center gap-1 rounded-full px-2 text-xs font-semibold", w.mastered ? "bg-primary text-primary-foreground" : "bg-muted")}
+                      className={cn(
+                        "ml-1 inline-flex min-h-8 items-center gap-1 rounded-full px-2 text-xs font-semibold",
+                        w.mastered ? "bg-primary text-primary-foreground" : "bg-muted",
+                      )}
                     >
-                      <Check className="h-3 w-3" aria-hidden /> {w.mastered ? "Learned" : "Tick learned"}
+                      <Check className="h-3 w-3" aria-hidden />{" "}
+                      {w.mastered ? "Learned" : "Tick learned"}
                     </button>
-                    <button type="button" aria-label={`Correct the spelling of “${w.word}”`} className="inline-flex min-h-8 items-center rounded-full px-2 text-xs" onClick={() => { setEditWordId(w.id); setEditWordText(w.word); }}>
+                    <button
+                      type="button"
+                      aria-label={`Correct the spelling of “${w.word}”`}
+                      className="inline-flex min-h-8 items-center rounded-full px-2 text-xs"
+                      onClick={() => {
+                        setEditWordId(w.id);
+                        setEditWordText(w.word);
+                      }}
+                    >
                       <Pencil className="h-3 w-3" aria-hidden />
                     </button>
                   </>
@@ -302,13 +478,27 @@ function ChildPage() {
         <section>
           <h2 className="text-xl font-semibold">All notes from volunteers</h2>
           {notes.length <= 6 ? (
-            <ul className="mt-3 space-y-3">{notes.map((n, i) => <li key={i}>{noteCard(n)}</li>)}</ul>
+            <ul className="mt-3 space-y-3">
+              {notes.map((n, i) => (
+                <li key={i}>{noteCard(n)}</li>
+              ))}
+            </ul>
           ) : (
             <div className="mt-3 space-y-4">
               {groupNotes(notes).map(([label, group]) => (
-                <details key={label} className="rounded-2xl border bg-card p-4" open={label === "Other notes"}>
-                  <summary className="min-h-11 cursor-pointer font-semibold">{label} ({group.length})</summary>
-                  <ul className="mt-3 space-y-3">{group.map((n, i) => <li key={i}>{noteCard(n)}</li>)}</ul>
+                <details
+                  key={label}
+                  className="rounded-2xl border bg-card p-4"
+                  open={label === "Other notes"}
+                >
+                  <summary className="min-h-11 cursor-pointer font-semibold">
+                    {label} ({group.length})
+                  </summary>
+                  <ul className="mt-3 space-y-3">
+                    {group.map((n, i) => (
+                      <li key={i}>{noteCard(n)}</li>
+                    ))}
+                  </ul>
                 </details>
               ))}
             </div>
@@ -318,17 +508,27 @@ function ChildPage() {
 
       <section>
         <h2 className="text-xl font-semibold">Session history</h2>
-        {sessions.length === 0 ? <p className="mt-2 text-muted-foreground">No sessions yet.</p> : (
+        {sessions.length === 0 ? (
+          <p className="mt-2 text-muted-foreground">No sessions yet.</p>
+        ) : (
           <ul className="mt-3 space-y-2">
             {sessions.map((s) => {
               const hf = hfArray(s.handover_feedback)[0];
               return (
                 <li key={s.id}>
-                  <Link to="/sessions/$sessionId" params={{ sessionId: s.id }} className="block rounded-xl border bg-card p-4 hover:border-primary">
-                    <p className="font-semibold">{new Date(s.scheduled_at).toLocaleDateString()} · {s.books?.title ?? "No book"}</p>
+                  <Link
+                    to="/sessions/$sessionId"
+                    params={{ sessionId: s.id }}
+                    className="block rounded-xl border bg-card p-4 hover:border-primary"
+                  >
+                    <p className="font-semibold">
+                      {new Date(s.scheduled_at).toLocaleDateString()} ·{" "}
+                      {s.books?.title ?? "No book"}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {sessionStatusLabel(s.status)} · {s.profiles?.full_name ?? "A volunteer"}
-                      {hf && ` · Engagement ${hf.engagement}/5 · Confidence ${hf.confidence}/5 · Level: ${levelFitLabel(hf.level_fit)}`}
+                      {hf &&
+                        ` · Engagement ${hf.engagement}/5 · Confidence ${hf.confidence}/5 · Level: ${levelFitLabel(hf.level_fit)}`}
                     </p>
                   </Link>
                 </li>

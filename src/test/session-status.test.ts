@@ -1,5 +1,9 @@
 import { expect, it } from "vitest";
-import { canContinueSession, COMPLETED_SESSION_STATUS, sessionStatusLabel } from "@/lib/session-status";
+import {
+  canContinueSession,
+  COMPLETED_SESSION_STATUS,
+  sessionStatusLabel,
+} from "@/lib/session-status";
 
 it("finishes sessions with the database's completed value", () => {
   expect(COMPLETED_SESSION_STATUS).toBe("completed");

@@ -15,6 +15,7 @@ type WordCardInput = {
   example_sentence: string;
 };
 
+/** Return a shuffled copy (Fisher–Yates); the input array is left untouched. */
 function shuffle<T>(items: T[]): T[] {
   const arr = [...items];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -47,8 +48,11 @@ export function buildQuiz(wordCards: WordCardInput[], discussionPrompts: string[
     });
   }
 
-  const sentenceCard = cards.find((c) => c.example_sentence.toLowerCase().includes(c.word.toLowerCase()));
+  const sentenceCard = cards.find((c) =>
+    c.example_sentence.toLowerCase().includes(c.word.toLowerCase()),
+  );
   if (sentenceCard) {
+    // Blank out the first occurrence of the word, escaping any regex special characters in it.
     const blanked = sentenceCard.example_sentence.replace(
       new RegExp(sentenceCard.word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"),
       "____",

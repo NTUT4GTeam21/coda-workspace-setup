@@ -1,28 +1,52 @@
-import { detectSgsl, parseSgslList, sgslCandidates, sgslUrl, SGSL_BASE, type SgslResult } from "./sgsl";
+import {
+  detectSgsl,
+  parseSgslList,
+  sgslCandidates,
+  sgslUrl,
+  SGSL_BASE,
+  type SgslResult,
+} from "./sgsl";
 
+/** Fetch one Signbank page after a 3-second pause. Returns null on any failure or timeout. */
 async function fetchSignbank(url: string) {
   // Sequential requests, including the first request in each invocation, stay gentle on NTU.
   await new Promise((resolve) => setTimeout(resolve, 3000));
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(12000), headers: { Accept: "text/html" } });
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(12000),
+      headers: { Accept: "text/html" },
+    });
     if (!response.ok) return null;
     return await response.text();
   } catch {
     return null;
   }
 }
+/** The Signbank's full word list, used to suggest variant entries such as "Light (Noun)". */
 export async function loadSgslList() {
   const html = await fetchSignbank(`${SGSL_BASE}word-2/`);
   return html === null ? null : parseSgslList(html);
 }
+/**
+ * Decide whether a word has an SgSL sign:
+ * found = exact entry; possible = variant entries for staff to review;
+ * missing = no entry; failed = the site could not be read, so nothing should be changed.
+ */
 export async function checkSgslWord(word: string, list: string[] | null): Promise<SgslResult> {
   const url = sgslUrl(word);
   const html = await fetchSignbank(url);
-  const detection = html === null ? { kind: "failed" as const, headings: [] } : detectSgsl(html, word);
+  const detection =
+    html === null ? { kind: "failed" as const, headings: [] } : detectSgsl(html, word);
   if (detection.kind === "found") return { kind: "found", url, candidates: [] };
   if (detection.kind === "failed") return { kind: "failed", url: null, candidates: [] };
   if (detection.kind === "possible") {
-    return { kind: "possible", url: null, candidates: [...new Set([...detection.headings, ...(list ? sgslCandidates(word, list) : [])])] };
+    return {
+      kind: "possible",
+      url: null,
+      candidates: [
+        ...new Set([...detection.headings, ...(list ? sgslCandidates(word, list) : [])]),
+      ],
+    };
   }
   if (list === null) return { kind: "failed", url: null, candidates: [] };
   const candidates = sgslCandidates(word, list);

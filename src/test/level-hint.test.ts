@@ -10,6 +10,8 @@ describe("levelFitHint", () => {
     expect(levelFitHint(["too_hard", "about_right"])).toBe("Last session marked Too hard");
   });
   it("says last 2 sessions when the two latest marks agree", () => {
-    expect(levelFitHint(["too_easy", "too_easy", "about_right"])).toBe("Last 2 sessions marked Too easy");
+    expect(levelFitHint(["too_easy", "too_easy", "about_right"])).toBe(
+      "Last 2 sessions marked Too easy",
+    );
   });
 });

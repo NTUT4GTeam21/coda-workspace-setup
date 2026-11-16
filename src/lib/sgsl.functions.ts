@@ -4,29 +4,53 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertSgslStaff, normaliseWord, sgslPatch } from "./sgsl";
 import { checkSgslWord, loadSgslList } from "./sgsl.server";
 
+// Staff-only server functions for SgSL sign links. Each one re-checks the caller's role in
+// the database before doing anything, and none of them overwrite a staff member's manual choice.
+
+/** Start a re-check: return each distinct word that is not manually set, plus the Signbank word list. */
 export const beginSgslRun = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const role = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    const role = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
     if (role.error) throw new Error("Staff access could not be verified.");
     assertSgslStaff(role.data);
-    const { data, error } = await context.supabase.from("word_cards").select("word").eq("sgsl_manual", false);
+    const { data, error } = await context.supabase
+      .from("word_cards")
+      .select("word")
+      .eq("sgsl_manual", false);
     if (error) throw new Error("Word cards could not load.");
     const unique = new Map<string, string>();
-    for (const row of data ?? []) if (row.word.trim()) unique.set(normaliseWord(row.word), row.word.trim());
+    for (const row of data ?? [])
+      if (row.word.trim()) unique.set(normaliseWord(row.word), row.word.trim());
     return { words: [...unique.values()], list: await loadSgslList() };
   });
 
+/** Check up to three words against the Signbank and save the results; returns counts per outcome. */
 export const checkSgslBatch = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(z.object({ words: z.array(z.string().trim().min(1).max(120)).max(3), list: z.array(z.string().max(200)).max(10000).nullable() }))
+  .inputValidator(
+    z.object({
+      words: z.array(z.string().trim().min(1).max(120)).max(3),
+      list: z.array(z.string().max(200)).max(10000).nullable(),
+    }),
+  )
   .handler(async ({ context, data }) => {
-    const role = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    const role = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
     if (role.error) throw new Error("Staff access could not be verified.");
     assertSgslStaff(role.data);
     const counts = { found: 0, possible: 0, missing: 0, failed: 0 };
-    const { data: cards, error } = await context.supabase.from("word_cards").select("id, word").eq("sgsl_manual", false);
+    const { data: cards, error } = await context.supabase
+      .from("word_cards")
+      .select("id, word")
+      .eq("sgsl_manual", false);
     if (error) throw new Error("Word cards could not load.");
+    // The same word can appear on several books' cards: look it up once, then update every card.
     for (const word of [...new Set(data.words.map(normaliseWord))]) {
       const matches = (cards ?? []).filter((card) => normaliseWord(card.word) === word);
       const firstMatch = matches[0];
@@ -36,7 +60,12 @@ export const checkSgslBatch = createServerFn({ method: "POST" })
       if (patch) {
         // Re-check manual flag and original word at write time to protect concurrent staff edits.
         for (const card of matches) {
-          const saved = await context.supabase.from("word_cards").update(patch).eq("id", card.id).eq("word", card.word).eq("sgsl_manual", false);
+          const saved = await context.supabase
+            .from("word_cards")
+            .update(patch)
+            .eq("id", card.id)
+            .eq("word", card.word)
+            .eq("sgsl_manual", false);
           if (saved.error) throw new Error("SgSL results could not be saved. Please retry.");
         }
       }
@@ -46,28 +75,60 @@ export const checkSgslBatch = createServerFn({ method: "POST" })
   });
 
 const wordInput = z.object({
-  id: z.string().uuid().optional(), bookId: z.string().uuid(), word: z.string().trim().min(1).max(120),
-  definition: z.string().trim(), pronunciation: z.string().trim(), example_sentence: z.string().trim(),
-  sign_bank_url: z.string().url().nullable(), sgsl_url: z.string().url().nullable(),
+  id: z.string().uuid().optional(),
+  bookId: z.string().uuid(),
+  word: z.string().trim().min(1).max(120),
+  definition: z.string().trim(),
+  pronunciation: z.string().trim(),
+  example_sentence: z.string().trim(),
+  sign_bank_url: z.string().url().nullable(),
+  sgsl_url: z.string().url().nullable(),
 });
+/** Create or edit a word card, then look up its SgSL sign unless staff supplied a link themselves. */
 export const saveSgslWordCard = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(wordInput)
   .handler(async ({ context, data }) => {
-    const role = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    const role = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
     if (role.error) throw new Error("Staff access could not be verified.");
     assertSgslStaff(role.data);
     const { id, bookId, ...fields } = data;
-    const old = id ? await context.supabase.from("word_cards").select("word,sgsl_url,sgsl_manual").eq("id", id).eq("book_id", bookId).single() : null;
+    const old = id
+      ? await context.supabase
+          .from("word_cards")
+          .select("word,sgsl_url,sgsl_manual")
+          .eq("id", id)
+          .eq("book_id", bookId)
+          .single()
+      : null;
     if (old?.error) throw new Error("Word card could not load.");
+    // A link counts as manual when staff typed a new one, or when the card was already manual.
     const overrideChanged = fields.sgsl_url !== (old?.data?.sgsl_url ?? null);
     const manual = fields.sgsl_url !== null && (overrideChanged || old?.data?.sgsl_manual === true);
     // An unchanged auto-found URL remains automatic; clearing it opts back into checking.
-    const mustCheck = !id || fields.word !== old?.data?.word || (overrideChanged && fields.sgsl_url === null);
-    const payload = { ...fields, sgsl_manual: manual, ...(manual || mustCheck ? { sgsl_candidates: [] } : {}) };
+    const mustCheck =
+      !id || fields.word !== old?.data?.word || (overrideChanged && fields.sgsl_url === null);
+    const payload = {
+      ...fields,
+      sgsl_manual: manual,
+      ...(manual || mustCheck ? { sgsl_candidates: [] } : {}),
+    };
     const saved = id
-      ? await context.supabase.from("word_cards").update(payload).eq("id", id).eq("book_id", bookId).select("id").single()
-      : await context.supabase.from("word_cards").insert({ ...payload, book_id: bookId, status: "draft" }).select("id").single();
+      ? await context.supabase
+          .from("word_cards")
+          .update(payload)
+          .eq("id", id)
+          .eq("book_id", bookId)
+          .select("id")
+          .single()
+      : await context.supabase
+          .from("word_cards")
+          .insert({ ...payload, book_id: bookId, status: "draft" })
+          .select("id")
+          .single();
     if (saved.error || !saved.data) throw new Error("Word card could not be saved.");
     let result: string | null = null;
     if (mustCheck && !manual) {
@@ -75,23 +136,36 @@ export const saveSgslWordCard = createServerFn({ method: "POST" })
       result = checked.kind;
       const patch = sgslPatch(checked, false, new Date().toISOString());
       if (patch) {
-        const updated = await context.supabase.from("word_cards").update(patch).eq("id", saved.data.id).eq("word", fields.word).eq("sgsl_manual", false);
-        if (updated.error) throw new Error("Word saved, but its sign result could not save. Please re-check.");
+        const updated = await context.supabase
+          .from("word_cards")
+          .update(patch)
+          .eq("id", saved.data.id)
+          .eq("word", fields.word)
+          .eq("sgsl_manual", false);
+        if (updated.error)
+          throw new Error("Word saved, but its sign result could not save. Please re-check.");
       }
     }
     return { result };
   });
+/** Staff decided none of the possible matches fit this word. */
 export const rejectSgslCandidates = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))
   .handler(async ({ context, data }) => {
-    const role = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    const role = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
     if (role.error) throw new Error("Staff access could not be verified.");
     assertSgslStaff(role.data);
     // Manual + empty link keeps the ASL fallback and stops automatic re-checks restoring candidates.
-    const saved = await context.supabase.from("word_cards")
+    const saved = await context.supabase
+      .from("word_cards")
       .update({ sgsl_manual: true, sgsl_url: null, sgsl_candidates: [] })
-      .eq("id", data.id).select("id").single();
+      .eq("id", data.id)
+      .select("id")
+      .single();
     if (saved.error || !saved.data) throw new Error("Word card could not be saved.");
     return { ok: true };
   });

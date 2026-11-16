@@ -53,10 +53,17 @@ function Guide() {
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [busy, setBusy] = useState(false);
   const [feedback, setFeedback] = useState<QuizFeedback | null>(null);
-  const [editCard, setEditCard] = useState<{ id: string; title: string; steps: string; avoid_tip: string } | null>(null);
+  const [editCard, setEditCard] = useState<{
+    id: string;
+    title: string;
+    steps: string;
+    avoid_tip: string;
+  } | null>(null);
   const [submitMessage, setSubmitMessage] = useState("");
   const resultRef = useRef<HTMLDivElement>(null);
   const [passed, setPassed] = useState(false);
+  // Merge cards already marked read on the server with any read in this visit.
+  // Joined to a string so the effect only re-runs when the list actually changes.
   const savedRead = me?.guideCardsRead.join(",");
   useEffect(() => {
     if (!savedRead) return;
@@ -95,6 +102,7 @@ function Guide() {
   const { cards, questions } = data;
   if (!cards.length || !questions.length)
     return <p role="alert">The guide is not available yet. Please contact programme staff.</p>;
+  // Steps 0..cards.length-1 are scenario cards; the step after the last card is the quiz.
   const onQuiz = step >= cards.length;
   const card = cards[step];
   const completed = passed || me?.qualified;
@@ -104,6 +112,7 @@ function Guide() {
     step < 3 ? "Understand & connect" : step < 8 ? "Read & respond" : "Care & hand over";
   const canSubmit = me?.isVolunteer || me?.isAdmin;
 
+  /** Move to the next card, saving the current one as read in the background. */
   function advance() {
     if (card && !read.has(card.id)) {
       setRead((previous) => new Set([...previous, card.id]));
@@ -114,15 +123,20 @@ function Guide() {
     }
     setStep(step + 1);
   }
+  /** Clear the quiz so a volunteer can retake it for practice. */
   function practiceAgain() {
     setAnswers({});
     setFeedback(null);
     setSubmitMessage("");
     document.getElementById("quiz-top")?.scrollIntoView({ block: "start", behavior: "instant" });
   }
+  /** Staff edit of a guide card; steps are typed one per line. */
   async function saveCard() {
     if (!editCard) return;
-    const steps = editCard.steps.split("\n").map((s) => s.trim()).filter(Boolean);
+    const steps = editCard.steps
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
     if (!editCard.title.trim() || steps.length === 0) {
       toast.error("The card needs a title and at least one step.");
       return;
@@ -139,14 +153,22 @@ function Guide() {
     setEditCard(null);
     refetch();
   }
+  /**
+   * Send answers to the database for marking. The answer key never reaches the browser:
+   * the RPC returns only pass/fail and which questions were wrong. Unanswered questions
+   * are sent as -1. Answers stay on screen if the request fails.
+   */
   async function submit() {
     if (busy || !allRead || answered !== questions.length) return;
     setBusy(true);
     try {
       setSubmitMessage("");
-      const { data: rawResult, error: submitError } = await supabase.rpc("submit_guide_quiz_feedback", {
-        _answers: questions.map((_, i) => answers[i] ?? -1),
-      });
+      const { data: rawResult, error: submitError } = await supabase.rpc(
+        "submit_guide_quiz_feedback",
+        {
+          _answers: questions.map((_, i) => answers[i] ?? -1),
+        },
+      );
       if (submitError) throw submitError;
       const result = parseQuizFeedback(rawResult);
       setFeedback(result);
@@ -156,7 +178,9 @@ function Guide() {
         toast.success("You passed! Children and sessions are now unlocked.");
       }
     } catch {
-      setSubmitMessage("Your quiz could not be submitted. Your answers are still here; please try again.");
+      setSubmitMessage(
+        "Your quiz could not be submitted. Your answers are still here; please try again.",
+      );
       toast.error(
         "Your quiz could not be submitted. Your answers are still here; please try again.",
       );
@@ -195,7 +219,8 @@ function Guide() {
           className="flex flex-wrap items-center gap-2 border-l-4 border-primary bg-secondary p-4 text-secondary-foreground"
         >
           <CheckCircle2 className="size-5" aria-hidden /> You’ve passed the guide
-          {me?.qualifiedUntil ? ` · qualified until ${me.qualifiedUntil.toLocaleDateString()}` : ""}.{" "}
+          {me?.qualifiedUntil ? ` · qualified until ${me.qualifiedUntil.toLocaleDateString()}` : ""}
+          .{" "}
           <Link to="/dashboard" className="font-bold underline">
             Go to your children
           </Link>
@@ -346,8 +371,15 @@ function Guide() {
                 <p className="mb-2 text-sm font-semibold text-primary">
                   Put your care into practice
                 </p>
-                <h2 id="quiz-top" className="scroll-mt-40 text-2xl font-bold">{completed ? "Practice knowledge check" : "Knowledge check"}</h2>
-                {completed && <p className="mt-1 text-sm">Practise as often as you like. A wrong answer won't remove your qualification; a full pass renews it for a year.</p>}
+                <h2 id="quiz-top" className="scroll-mt-40 text-2xl font-bold">
+                  {completed ? "Practice knowledge check" : "Knowledge check"}
+                </h2>
+                {completed && (
+                  <p className="mt-1 text-sm">
+                    Practise as often as you like. A wrong answer won't remove your qualification; a
+                    full pass renews it for a year.
+                  </p>
+                )}
                 <p className="mt-2 text-muted-foreground">
                   {answered} of {questions.length} answered · All answers must be correct to pass.
                 </p>
@@ -358,11 +390,22 @@ function Guide() {
                 </p>
               )}
               {questions.map((q, i) => (
-                <fieldset id={`question-${q.id}`} key={q.id} className={cn("scroll-mt-40 rounded-lg border bg-card p-4 sm:p-5", feedback?.incorrect_question_ids.includes(q.id) && "border-destructive")}>
+                <fieldset
+                  id={`question-${q.id}`}
+                  key={q.id}
+                  className={cn(
+                    "scroll-mt-40 rounded-lg border bg-card p-4 sm:p-5",
+                    feedback?.incorrect_question_ids.includes(q.id) && "border-destructive",
+                  )}
+                >
                   <legend className="px-1 font-heading text-sm font-semibold">
                     {i + 1}. {q.question}
                   </legend>
-                  {feedback?.incorrect_question_ids.includes(q.id) && <p className="mb-2 text-sm font-semibold text-destructive">Incorrect in your last attempt — review this question.</p>}
+                  {feedback?.incorrect_question_ids.includes(q.id) && (
+                    <p className="mb-2 text-sm font-semibold text-destructive">
+                      Incorrect in your last attempt — review this question.
+                    </p>
+                  )}
                   <div className="space-y-2">
                     {q.options.map((o, j) => (
                       <label
@@ -403,7 +446,11 @@ function Guide() {
                   disabled={busy || (!allRead && !completed) || answered !== questions.length}
                   onClick={submit}
                 >
-                  {busy ? "Checking your answers…" : completed ? "Check my practice answers" : "Submit knowledge check"}
+                  {busy
+                    ? "Checking your answers…"
+                    : completed
+                      ? "Check my practice answers"
+                      : "Submit knowledge check"}
                   <ShieldCheck aria-hidden />
                 </Button>
               ) : (
@@ -412,24 +459,68 @@ function Guide() {
                 </p>
               )}
               <div ref={resultRef} tabIndex={-1} className="focus:outline-none" aria-live="polite">
-                {submitMessage && <p role="alert" className="border-l-4 border-destructive p-4">{submitMessage}</p>}
+                {submitMessage && (
+                  <p role="alert" className="border-l-4 border-destructive p-4">
+                    {submitMessage}
+                  </p>
+                )}
                 {feedback && (
-                  <div className={cn("space-y-3 border-l-4 p-5", feedback.passed ? "border-primary bg-secondary" : "border-destructive bg-muted")}>
-                    <h3 className="text-xl font-bold">{feedback.passed ? "You passed! You’re ready to read." : "Not passed yet — let’s try again."}</h3>
-                    <p>{feedback.total - feedback.incorrect_question_ids.length} of {feedback.total} correct.{feedback.passed ? " Your volunteer access is unlocked for another year." : completed ? " This was practice — your qualification is not affected." : " All questions must be correct to pass. Your choices are kept while you review."}</p>
+                  <div
+                    className={cn(
+                      "space-y-3 border-l-4 p-5",
+                      feedback.passed
+                        ? "border-primary bg-secondary"
+                        : "border-destructive bg-muted",
+                    )}
+                  >
+                    <h3 className="text-xl font-bold">
+                      {feedback.passed
+                        ? "You passed! You’re ready to read."
+                        : "Not passed yet — let’s try again."}
+                    </h3>
+                    <p>
+                      {feedback.total - feedback.incorrect_question_ids.length} of {feedback.total}{" "}
+                      correct.
+                      {feedback.passed
+                        ? " Your volunteer access is unlocked for another year."
+                        : completed
+                          ? " This was practice — your qualification is not affected."
+                          : " All questions must be correct to pass. Your choices are kept while you review."}
+                    </p>
                     {feedback.passed ? (
                       <div className="flex flex-wrap gap-2">
-                        <Button asChild className="min-h-11"><Link to="/dashboard">Go to my children <ArrowRight aria-hidden /></Link></Button>
-                        <Button asChild variant="outline" className="min-h-11"><Link to="/library">Explore the library <BookOpen aria-hidden /></Link></Button>
-                        <Button variant="ghost" className="min-h-11" onClick={practiceAgain}>Practise again</Button>
+                        <Button asChild className="min-h-11">
+                          <Link to="/dashboard">
+                            Go to my children <ArrowRight aria-hidden />
+                          </Link>
+                        </Button>
+                        <Button asChild variant="outline" className="min-h-11">
+                          <Link to="/library">
+                            Explore the library <BookOpen aria-hidden />
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" className="min-h-11" onClick={practiceAgain}>
+                          Practise again
+                        </Button>
                       </div>
                     ) : (
                       <div className="flex flex-wrap gap-2">
-                        {questions.filter((q) => feedback.incorrect_question_ids.includes(q.id)).map((q) => (
-                          <Button key={q.id} variant="outline" className="min-h-11" onClick={() => document.getElementById(`question-${q.id}`)?.scrollIntoView({ block: "center", behavior: "instant" })}>
-                            Review question {questions.findIndex((item) => item.id === q.id) + 1}
-                          </Button>
-                        ))}
+                        {questions
+                          .filter((q) => feedback.incorrect_question_ids.includes(q.id))
+                          .map((q) => (
+                            <Button
+                              key={q.id}
+                              variant="outline"
+                              className="min-h-11"
+                              onClick={() =>
+                                document
+                                  .getElementById(`question-${q.id}`)
+                                  ?.scrollIntoView({ block: "center", behavior: "instant" })
+                              }
+                            >
+                              Review question {questions.findIndex((item) => item.id === q.id) + 1}
+                            </Button>
+                          ))}
                       </div>
                     )}
                   </div>
@@ -468,22 +559,41 @@ function Guide() {
       <Dialog open={!!editCard} onOpenChange={(o) => !o && setEditCard(null)}>
         <DialogContent className="max-w-lg">
           <DialogTitle>Edit guide card</DialogTitle>
-          <DialogDescription>Write one step per line. Changes appear for all volunteers.</DialogDescription>
+          <DialogDescription>
+            Write one step per line. Changes appear for all volunteers.
+          </DialogDescription>
           {editCard && (
             <div className="space-y-3">
               <div className="space-y-1.5">
                 <Label htmlFor="gc-title">Title</Label>
-                <Input id="gc-title" value={editCard.title} onChange={(e) => setEditCard({ ...editCard, title: e.target.value })} className="min-h-11" />
+                <Input
+                  id="gc-title"
+                  value={editCard.title}
+                  onChange={(e) => setEditCard({ ...editCard, title: e.target.value })}
+                  className="min-h-11"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="gc-steps">Steps (one per line)</Label>
-                <Textarea id="gc-steps" rows={7} value={editCard.steps} onChange={(e) => setEditCard({ ...editCard, steps: e.target.value })} />
+                <Textarea
+                  id="gc-steps"
+                  rows={7}
+                  value={editCard.steps}
+                  onChange={(e) => setEditCard({ ...editCard, steps: e.target.value })}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="gc-avoid">Keep in mind (optional)</Label>
-                <Textarea id="gc-avoid" rows={2} value={editCard.avoid_tip} onChange={(e) => setEditCard({ ...editCard, avoid_tip: e.target.value })} />
+                <Textarea
+                  id="gc-avoid"
+                  rows={2}
+                  value={editCard.avoid_tip}
+                  onChange={(e) => setEditCard({ ...editCard, avoid_tip: e.target.value })}
+                />
               </div>
-              <Button className="min-h-11 w-full" onClick={saveCard}>Save card</Button>
+              <Button className="min-h-11 w-full" onClick={saveCard}>
+                Save card
+              </Button>
             </div>
           )}
         </DialogContent>
