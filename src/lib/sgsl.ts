@@ -7,6 +7,7 @@ export type SgslResult = {
   candidates: string[];
 };
 export const normaliseWord = (word: string) => word.trim().toLowerCase();
+/** Signbank page address for a word; the site expects a capital first letter. */
 export function sgslUrl(word: string) {
   const trimmed = word.trim();
   return `${SGSL_BASE}word/?frm-word=${encodeURIComponent(trimmed.charAt(0).toUpperCase() + trimmed.slice(1))}`;
@@ -15,6 +16,7 @@ export type SgslDetection = {
   kind: "found" | "possible" | "missing" | "failed";
   headings: string[];
 };
+/** Read a Signbank page and classify it. Anything unrecognised is "failed", never "missing". */
 export function detectSgsl(html: string, word: string): SgslDetection {
   const { document } = parseHTML(html);
   document.querySelectorAll("script,style").forEach((node) => node.remove());
@@ -37,6 +39,7 @@ export function detectSgsl(html: string, word: string): SgslDetection {
   if (/no entries found/i.test(text)) return { kind: "missing", headings: [] };
   return { kind: "failed", headings: [] };
 }
+/** Extract the word list from the Signbank search page; null if the page layout is not as expected. */
 export function parseSgslList(html: string): string[] | null {
   const { document } = parseHTML(html);
   // NTU exposes its complete alphabetical word list in the sign-search select.
@@ -45,14 +48,17 @@ export function parseSgslList(html: string): string[] | null {
     .filter(Boolean);
   return names.length ? [...new Set(names)] : null;
 }
+/** Entries named like "word (…)", e.g. "Light (Noun)" for "light". */
 export function sgslCandidates(word: string, names: string[]) {
   const prefix = `${normaliseWord(word)} (`;
   return names.filter((name) => normaliseWord(name).startsWith(prefix));
 }
+/** Database fields to save for a result, or null when nothing should change (manual link or failed fetch). */
 export function sgslPatch(result: SgslResult, manual: boolean, checkedAt: string) {
   if (manual || result.kind === "failed") return null;
   return { sgsl_url: result.url, sgsl_candidates: result.candidates, sgsl_checked_at: checkedAt };
 }
+/** Throw unless the database confirmed the caller is programme staff. */
 export function assertSgslStaff(isStaff: boolean | null) {
   if (isStaff !== true) throw new Error("Programme staff access is required.");
 }

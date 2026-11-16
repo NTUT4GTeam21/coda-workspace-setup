@@ -4,6 +4,7 @@ export type QuizFeedback = {
   incorrect_question_ids: string[];
 };
 
+/** Validate the quiz-marking RPC's JSON result before the UI trusts it; throws if the shape is wrong. */
 export function parseQuizFeedback(value: unknown): QuizFeedback {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new Error("Quiz result is unavailable");

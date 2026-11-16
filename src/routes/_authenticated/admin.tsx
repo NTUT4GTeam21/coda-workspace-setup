@@ -37,6 +37,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: Admin,
 });
 
+/** Make a sign-up code such as VOL-7KQ2MX. The alphabet leaves out look-alikes (I, O, 0, 1). */
 function newCode(prefix: string) {
   const c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   return (
@@ -44,6 +45,7 @@ function newCode(prefix: string) {
   );
 }
 
+/** A small "are you sure?" dialog wrapped around any trigger button. */
 function Confirm({
   trigger,
   title,
@@ -113,6 +115,7 @@ function Admin() {
           .select("id, details, created_at, children(nickname), profiles(full_name)")
           .order("created_at", { ascending: false }),
       ]);
+      // Roles live in their own table, so join them onto each profile here.
       const has = (id: string, r: string) =>
         (roles ?? []).some((x) => x.user_id === id && x.role === r);
       const people = (profiles ?? []).map((p) => ({
@@ -137,6 +140,7 @@ function Admin() {
     qc.invalidateQueries({ queryKey: ["admin-data"] });
     qc.invalidateQueries({ queryKey: ["me"] });
   };
+  /** Run a database write, then show its error or refresh the page's data. */
   const call = async (p: PromiseLike<{ error: { message: string } | null }>) => {
     const { error } = await p;
     if (error) toast.error(error.message);
@@ -149,13 +153,11 @@ function Admin() {
   async function addCode(e: FormEvent) {
     e.preventDefault();
     await call(
-      supabase
-        .from("volunteer_codes")
-        .insert({
-          code: newCode(codeRole === "admin" ? "STF" : "VOL"),
-          label: codeLabel,
-          role: codeRole,
-        }),
+      supabase.from("volunteer_codes").insert({
+        code: newCode(codeRole === "admin" ? "STF" : "VOL"),
+        label: codeLabel,
+        role: codeRole,
+      }),
     );
     setCodeLabel("");
   }

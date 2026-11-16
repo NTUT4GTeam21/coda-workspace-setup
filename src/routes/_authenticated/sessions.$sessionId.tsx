@@ -82,6 +82,8 @@ function SessionPage() {
   const [editWordId, setEditWordId] = useState<string | null>(null);
   const [editWordText, setEditWordText] = useState("");
   const { data: me } = useMe();
+  // Drafts are stored per session and per user, so a transferred session never shows
+  // another volunteer's unsaved notes.
   const draftKey = `handover-draft-${sessionId}-${me?.id ?? "signed-out"}`;
   const restored = useRef(false);
 
@@ -111,8 +113,10 @@ function SessionPage() {
     },
   });
 
+  // UI hint only: the database enforces who may write to this session.
   const canWrite = data?.s ? canContinueSession(data.s.volunteer_id, me?.id, me?.isAdmin) : false;
 
+  // If the session is transferred away while this page is open, drop any unsaved edits.
   useEffect(() => {
     if (data?.s && !canWrite) {
       setDirty(false);
@@ -136,7 +140,6 @@ function SessionPage() {
     } catch {
       // Ignore a broken draft.
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, me, canWrite, draftKey]);
 
   // Auto-save handover progress locally as the volunteer types.
@@ -236,6 +239,7 @@ function SessionPage() {
     qc.invalidateQueries({ queryKey: key });
   }
 
+  /** Staff-only clean-up of an abandoned session; the database refuses it for anyone else. */
   async function deleteSession() {
     const { error } = await supabase.from("sessions").delete().eq("id", sessionId);
     if (error) {
@@ -246,6 +250,11 @@ function SessionPage() {
     navigate({ to: "/children/$childId", params: { childId: s.child_id } });
   }
 
+  /**
+   * Save the handover note, then mark the session completed. These are two separate writes:
+   * if the second fails the note is already stored, and because the note is upserted on
+   * session_id, pressing Save again retries safely without creating a duplicate.
+   */
   async function finish(e: FormEvent) {
     e.preventDefault();
     if (!canWrite || busy) return;
@@ -280,6 +289,7 @@ function SessionPage() {
     qc.invalidateQueries();
   }
 
+  /** A labelled 1–5 button row for the engagement and confidence ratings. */
   const scale = (k: "engagement" | "confidence", label: string) => (
     <fieldset>
       <legend className="text-sm font-semibold">{label} (1–5)</legend>

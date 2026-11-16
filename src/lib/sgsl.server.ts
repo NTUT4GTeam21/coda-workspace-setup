@@ -7,6 +7,7 @@ import {
   type SgslResult,
 } from "./sgsl";
 
+/** Fetch one Signbank page after a 3-second pause. Returns null on any failure or timeout. */
 async function fetchSignbank(url: string) {
   // Sequential requests, including the first request in each invocation, stay gentle on NTU.
   await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -21,10 +22,16 @@ async function fetchSignbank(url: string) {
     return null;
   }
 }
+/** The Signbank's full word list, used to suggest variant entries such as "Light (Noun)". */
 export async function loadSgslList() {
   const html = await fetchSignbank(`${SGSL_BASE}word-2/`);
   return html === null ? null : parseSgslList(html);
 }
+/**
+ * Decide whether a word has an SgSL sign:
+ * found = exact entry; possible = variant entries for staff to review;
+ * missing = no entry; failed = the site could not be read, so nothing should be changed.
+ */
 export async function checkSgslWord(word: string, list: string[] | null): Promise<SgslResult> {
   const url = sgslUrl(word);
   const html = await fetchSignbank(url);

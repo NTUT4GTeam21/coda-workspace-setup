@@ -9,6 +9,7 @@ export function canContinueSession(
   return Boolean(userId) && (isAdmin || volunteerId === userId);
 }
 
+/** Volunteer-facing label for a session's database status. */
 export function sessionStatusLabel(status: string): string {
   if (status === COMPLETED_SESSION_STATUS) return "Finished";
   if (status === "planned") return "Planned";

@@ -62,6 +62,8 @@ function Guide() {
   const [submitMessage, setSubmitMessage] = useState("");
   const resultRef = useRef<HTMLDivElement>(null);
   const [passed, setPassed] = useState(false);
+  // Merge cards already marked read on the server with any read in this visit.
+  // Joined to a string so the effect only re-runs when the list actually changes.
   const savedRead = me?.guideCardsRead.join(",");
   useEffect(() => {
     if (!savedRead) return;
@@ -100,6 +102,7 @@ function Guide() {
   const { cards, questions } = data;
   if (!cards.length || !questions.length)
     return <p role="alert">The guide is not available yet. Please contact programme staff.</p>;
+  // Steps 0..cards.length-1 are scenario cards; the step after the last card is the quiz.
   const onQuiz = step >= cards.length;
   const card = cards[step];
   const completed = passed || me?.qualified;
@@ -109,6 +112,7 @@ function Guide() {
     step < 3 ? "Understand & connect" : step < 8 ? "Read & respond" : "Care & hand over";
   const canSubmit = me?.isVolunteer || me?.isAdmin;
 
+  /** Move to the next card, saving the current one as read in the background. */
   function advance() {
     if (card && !read.has(card.id)) {
       setRead((previous) => new Set([...previous, card.id]));
@@ -119,12 +123,14 @@ function Guide() {
     }
     setStep(step + 1);
   }
+  /** Clear the quiz so a volunteer can retake it for practice. */
   function practiceAgain() {
     setAnswers({});
     setFeedback(null);
     setSubmitMessage("");
     document.getElementById("quiz-top")?.scrollIntoView({ block: "start", behavior: "instant" });
   }
+  /** Staff edit of a guide card; steps are typed one per line. */
   async function saveCard() {
     if (!editCard) return;
     const steps = editCard.steps
@@ -147,6 +153,11 @@ function Guide() {
     setEditCard(null);
     refetch();
   }
+  /**
+   * Send answers to the database for marking. The answer key never reaches the browser:
+   * the RPC returns only pass/fail and which questions were wrong. Unanswered questions
+   * are sent as -1. Answers stay on screen if the request fails.
+   */
   async function submit() {
     if (busy || !allRead || answered !== questions.length) return;
     setBusy(true);

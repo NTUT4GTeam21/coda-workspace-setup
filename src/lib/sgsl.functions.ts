@@ -4,6 +4,10 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertSgslStaff, normaliseWord, sgslPatch } from "./sgsl";
 import { checkSgslWord, loadSgslList } from "./sgsl.server";
 
+// Staff-only server functions for SgSL sign links. Each one re-checks the caller's role in
+// the database before doing anything, and none of them overwrite a staff member's manual choice.
+
+/** Start a re-check: return each distinct word that is not manually set, plus the Signbank word list. */
 export const beginSgslRun = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -24,6 +28,7 @@ export const beginSgslRun = createServerFn({ method: "POST" })
     return { words: [...unique.values()], list: await loadSgslList() };
   });
 
+/** Check up to three words against the Signbank and save the results; returns counts per outcome. */
 export const checkSgslBatch = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
@@ -45,6 +50,7 @@ export const checkSgslBatch = createServerFn({ method: "POST" })
       .select("id, word")
       .eq("sgsl_manual", false);
     if (error) throw new Error("Word cards could not load.");
+    // The same word can appear on several books' cards: look it up once, then update every card.
     for (const word of [...new Set(data.words.map(normaliseWord))]) {
       const matches = (cards ?? []).filter((card) => normaliseWord(card.word) === word);
       const firstMatch = matches[0];
@@ -78,6 +84,7 @@ const wordInput = z.object({
   sign_bank_url: z.string().url().nullable(),
   sgsl_url: z.string().url().nullable(),
 });
+/** Create or edit a word card, then look up its SgSL sign unless staff supplied a link themselves. */
 export const saveSgslWordCard = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(wordInput)
@@ -98,6 +105,7 @@ export const saveSgslWordCard = createServerFn({ method: "POST" })
           .single()
       : null;
     if (old?.error) throw new Error("Word card could not load.");
+    // A link counts as manual when staff typed a new one, or when the card was already manual.
     const overrideChanged = fields.sgsl_url !== (old?.data?.sgsl_url ?? null);
     const manual = fields.sgsl_url !== null && (overrideChanged || old?.data?.sgsl_manual === true);
     // An unchanged auto-found URL remains automatic; clearing it opts back into checking.
@@ -140,6 +148,7 @@ export const saveSgslWordCard = createServerFn({ method: "POST" })
     }
     return { result };
   });
+/** Staff decided none of the possible matches fit this word. */
 export const rejectSgslCandidates = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(z.object({ id: z.string().uuid() }))

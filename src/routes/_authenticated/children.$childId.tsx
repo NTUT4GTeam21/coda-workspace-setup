@@ -60,12 +60,14 @@ function hfArray(h: SessionRow["handover_feedback"]): HF[] {
   return h ? (Array.isArray(h) ? h : [h]) : [];
 }
 
+// Topic headings for the notes history. A note joins the first group whose keyword it mentions.
 const NOTE_GROUPS: { label: string; keywords: string[] }[] = [
   { label: "Level & book fit", keywords: ["level", "easy", "hard", "book"] },
   { label: "Words & signing", keywords: ["word", "sign", "vocabulary", "spell"] },
   { label: "Focus & mood", keywords: ["focus", "tired", "enjoy", "happy", "upset", "engage"] },
 ];
 
+/** Sort handover notes under topic headings by simple keyword match; unmatched go to "Other notes". */
 function groupNotes(notes: (HF & { volunteer: string; date: string })[]) {
   const groups = new Map<string, typeof notes>();
   for (const n of notes) {
@@ -130,10 +132,12 @@ function ChildPage() {
   if (!data?.child) return <p>Child not found, or not assigned to you.</p>;
   const { child, sessions, words, books, templates } = data;
 
+  // Level-fit marks from finished sessions, newest first; these drive the level hint and book suggestions.
   const recentFits = sessions
     .filter((s) => s.status === COMPLETED_SESSION_STATUS && hfArray(s.handover_feedback).length > 0)
     .map((s) => hfArray(s.handover_feedback)[0]!.level_fit);
   const fitHint = levelFitHint(recentFits);
+  // Prefer the signed-in volunteer's own unfinished session, else anyone's, to avoid duplicates.
   const inProgress =
     sessions.find((s) => s.status === "in_progress" && s.volunteer_id === me?.id) ??
     sessions.find((s) => s.status === "in_progress");
@@ -152,6 +156,7 @@ function ChildPage() {
     }));
   const lastNote = notes.find((n) => n.try_next || n.notes);
 
+  /** Change the child's reading level through an RPC that records the reason and who changed it. */
   async function changeLevel() {
     const level = newLevel || child!.current_level;
     if (level === child!.current_level) {
@@ -175,6 +180,7 @@ function ChildPage() {
     qc.invalidateQueries({ queryKey: ["child", childId] });
   }
 
+  /** Start a new session for this child. Blocked while another session is still in progress. */
   async function start() {
     if (!me || inProgress) return;
     setBusy(true);
