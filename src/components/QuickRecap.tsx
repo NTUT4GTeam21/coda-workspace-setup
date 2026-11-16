@@ -18,8 +18,21 @@ export function QuickRecap({ childId }: { childId: string }) {
     queryKey: ["quick-recap", childId],
     queryFn: async (): Promise<RecapCard[]> => {
       const [{ data: tricky }, { data: lastSession }] = await Promise.all([
-        supabase.from("tricky_words").select("id, word").eq("child_id", childId).eq("mastered", false).order("created_at", { ascending: false }),
-        supabase.from("sessions").select("book_id").eq("child_id", childId).eq("status", COMPLETED_SESSION_STATUS).not("book_id", "is", null).order("scheduled_at", { ascending: false }).limit(1).maybeSingle(),
+        supabase
+          .from("tricky_words")
+          .select("id, word")
+          .eq("child_id", childId)
+          .eq("mastered", false)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("sessions")
+          .select("book_id")
+          .eq("child_id", childId)
+          .eq("status", COMPLETED_SESSION_STATUS)
+          .not("book_id", "is", null)
+          .order("scheduled_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
       ]);
       const out: RecapCard[] = (tricky ?? []).map((w) => ({
         key: `t-${w.id}`,
@@ -58,7 +71,8 @@ export function QuickRecap({ childId }: { childId: string }) {
         <Sparkles className="text-primary" aria-hidden /> Quick Recap
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Warm up together: tap a card to flip it. Tricky words this child is still learning, plus key words from last time.
+        Warm up together: tap a card to flip it. Tricky words this child is still learning, plus key
+        words from last time.
       </p>
       <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {cards.map((c) => {
@@ -72,7 +86,9 @@ export function QuickRecap({ childId }: { childId: string }) {
                 aria-label={`${c.front} — tap to ${isFlipped ? "hide" : "see"} the meaning`}
                 className={cn(
                   "flex min-h-28 w-full flex-col items-center justify-center gap-1 rounded-2xl border-2 p-3 text-center transition",
-                  isFlipped ? "border-primary bg-secondary" : "border-story-sky bg-story-sky/40 hover:border-primary",
+                  isFlipped
+                    ? "border-primary bg-secondary"
+                    : "border-story-sky bg-story-sky/40 hover:border-primary",
                 )}
               >
                 {isFlipped ? (
@@ -81,7 +97,8 @@ export function QuickRecap({ childId }: { childId: string }) {
                   <>
                     <span className="font-heading text-xl font-bold">{c.front}</span>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <RotateCcw className="h-3 w-3" aria-hidden /> {c.source === "tricky" ? "Tricky word" : "Last session"}
+                      <RotateCcw className="h-3 w-3" aria-hidden />{" "}
+                      {c.source === "tricky" ? "Tricky word" : "Last session"}
                     </span>
                   </>
                 )}

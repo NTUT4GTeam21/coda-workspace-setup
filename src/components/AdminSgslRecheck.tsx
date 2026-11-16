@@ -30,7 +30,9 @@ export function AdminSgslRecheck() {
       }
       setSummary(totals);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "The SgSL check stopped. Run it again to continue.");
+      toast.error(
+        e instanceof Error ? e.message : "The SgSL check stopped. Run it again to continue.",
+      );
     } finally {
       setRunning(false);
     }
@@ -39,17 +41,25 @@ export function AdminSgslRecheck() {
   return (
     <section className="rounded-2xl border bg-card p-4">
       <h2 className="text-xl font-semibold">SgSL sign links</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Checks every word card against the SgSL Signbank. Staff-set links are never changed. It takes about 3 seconds per word.</p>
-      <Button className="mt-3 min-h-11" onClick={run} disabled={running}>{running ? "Checking…" : "Re-check SgSL signs"}</Button>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Checks every word card against the SgSL Signbank. Staff-set links are never changed. It
+        takes about 3 seconds per word.
+      </p>
+      <Button className="mt-3 min-h-11" onClick={run} disabled={running}>
+        {running ? "Checking…" : "Re-check SgSL signs"}
+      </Button>
       {progress && (
         <div className="mt-3 space-y-1" aria-live="polite">
           <Progress value={progress.total ? (progress.done / progress.total) * 100 : 100} />
-          <p className="text-sm">Checked {progress.done} of {progress.total} words</p>
+          <p className="text-sm">
+            Checked {progress.done} of {progress.total} words
+          </p>
         </div>
       )}
       {summary && (
         <p className="mt-2 font-semibold" aria-live="polite">
-          {summary.found} found · {summary.possible} possible matches to review · {summary.missing} not in SgSL · {summary.failed} failed
+          {summary.found} found · {summary.possible} possible matches to review · {summary.missing}{" "}
+          not in SgSL · {summary.failed} failed
         </p>
       )}
     </section>

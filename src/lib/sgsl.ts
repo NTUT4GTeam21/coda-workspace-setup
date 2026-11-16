@@ -1,21 +1,35 @@
 import { parseHTML } from "linkedom";
 
 export const SGSL_BASE = "https://blogs.ntu.edu.sg/sgslsignbank/";
-export type SgslResult = { kind: "found" | "possible" | "missing" | "failed"; url: string | null; candidates: string[] };
+export type SgslResult = {
+  kind: "found" | "possible" | "missing" | "failed";
+  url: string | null;
+  candidates: string[];
+};
 export const normaliseWord = (word: string) => word.trim().toLowerCase();
 export function sgslUrl(word: string) {
   const trimmed = word.trim();
   return `${SGSL_BASE}word/?frm-word=${encodeURIComponent(trimmed.charAt(0).toUpperCase() + trimmed.slice(1))}`;
 }
-export type SgslDetection = { kind: "found" | "possible" | "missing" | "failed"; headings: string[] };
+export type SgslDetection = {
+  kind: "found" | "possible" | "missing" | "failed";
+  headings: string[];
+};
 export function detectSgsl(html: string, word: string): SgslDetection {
   const { document } = parseHTML(html);
   document.querySelectorAll("script,style").forEach((node) => node.remove());
   const text = document.documentElement.textContent ?? "";
   // The site's entry is h1.h3; h1.entry-title is only the generic “Word” page title.
-  const headings = [...new Set(Array.from(document.querySelectorAll("h1.h3")).map((h) => (h.textContent ?? "").trim()).filter(Boolean))];
+  const headings = [
+    ...new Set(
+      Array.from(document.querySelectorAll("h1.h3"))
+        .map((h) => (h.textContent ?? "").trim())
+        .filter(Boolean),
+    ),
+  ];
   if (/description of sign/i.test(text)) {
-    if (headings.some((h) => normaliseWord(h) === normaliseWord(word))) return { kind: "found", headings: [] };
+    if (headings.some((h) => normaliseWord(h) === normaliseWord(word)))
+      return { kind: "found", headings: [] };
     // A sign page with variant headings (e.g. "Light (Noun)", "Light 2") needs staff review.
     if (headings.length) return { kind: "possible", headings };
     return { kind: "failed", headings: [] };
@@ -27,7 +41,8 @@ export function parseSgslList(html: string): string[] | null {
   const { document } = parseHTML(html);
   // NTU exposes its complete alphabetical word list in the sign-search select.
   const names = Array.from(document.querySelectorAll('select[name="item_meta[130]"] option[value]'))
-    .map((option) => option.getAttribute("value")?.trim() ?? "").filter(Boolean);
+    .map((option) => option.getAttribute("value")?.trim() ?? "")
+    .filter(Boolean);
   return names.length ? [...new Set(names)] : null;
 }
 export function sgslCandidates(word: string, names: string[]) {

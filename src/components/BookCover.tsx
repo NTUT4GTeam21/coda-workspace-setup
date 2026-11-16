@@ -2,7 +2,10 @@ import { cn } from "@/lib/utils";
 import baoReading from "@/assets/bao-reading.jpg";
 
 // Cover art is keyed by book id, so renaming a book never loses its picture.
-const coverFiles = import.meta.glob("@/assets/covers/*.jpg", { eager: true, import: "default" }) as Record<string, string>;
+const coverFiles = import.meta.glob("@/assets/covers/*.jpg", {
+  eager: true,
+  import: "default",
+}) as Record<string, string>;
 const COVERS: Record<string, string> = { "00000000-0000-0000-0000-0000000000b3": baoReading };
 for (const [path, url] of Object.entries(coverFiles)) {
   const key = path.split("/").pop()!.replace(".jpg", "");
@@ -25,7 +28,15 @@ function hashId(id: string): number {
 }
 
 /** A colourful illustrated cover for a book card, chosen deterministically from the book id. */
-export function BookCover({ bookId, title, className }: { bookId: string; title: string; className?: string }) {
+export function BookCover({
+  bookId,
+  title,
+  className,
+}: {
+  bookId: string;
+  title: string;
+  className?: string;
+}) {
   const cover = COVERS[bookId];
   if (cover) {
     return (
@@ -51,10 +62,21 @@ export function BookCover({ bookId, title, className }: { bookId: string; title:
         className,
       )}
     >
-      <span className={cn("absolute -left-4 -top-6 size-20 rounded-full opacity-70", palette.deco)} />
-      <span className={cn("absolute -bottom-8 -right-4 size-24 rounded-full opacity-60", palette.deco)} />
-      <span className={cn("absolute right-8 top-3 size-6 rotate-12 rounded-md opacity-70", palette.deco)} />
-      <span className={cn("font-heading text-6xl font-bold drop-shadow-sm", palette.ink)}>{initial}</span>
+      <span
+        className={cn("absolute -left-4 -top-6 size-20 rounded-full opacity-70", palette.deco)}
+      />
+      <span
+        className={cn("absolute -bottom-8 -right-4 size-24 rounded-full opacity-60", palette.deco)}
+      />
+      <span
+        className={cn(
+          "absolute right-8 top-3 size-6 rotate-12 rounded-md opacity-70",
+          palette.deco,
+        )}
+      />
+      <span className={cn("font-heading text-6xl font-bold drop-shadow-sm", palette.ink)}>
+        {initial}
+      </span>
     </div>
   );
 }

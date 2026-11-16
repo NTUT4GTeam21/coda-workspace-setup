@@ -9,7 +9,16 @@ import { BookCover } from "@/components/BookCover";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/library/")({
-  head: () => ({ meta: [{ title: "Book library · Read between the Signs" }, { name: "description", content: "Find a book by level, theme and length." }, { property: "og:title", content: "Book library · Read between the Signs" }, { property: "og:description", content: "Find a book by level, theme and length." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
+  head: () => ({
+    meta: [
+      { title: "Book library · Read between the Signs" },
+      { name: "description", content: "Find a book by level, theme and length." },
+      { property: "og:title", content: "Book library · Read between the Signs" },
+      { property: "og:description", content: "Find a book by level, theme and length." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: Library,
 });
 
@@ -26,7 +35,11 @@ function Library() {
   const [theme, setTheme] = useState<string | null>(null);
   const [length, setLength] = useState("any");
 
-  const { data: books, isLoading, error } = useQuery({
+  const {
+    data: books,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["books"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -39,7 +52,10 @@ function Library() {
     },
   });
 
-  const themes = useMemo(() => Array.from(new Set(books?.flatMap((b) => b.tags) ?? [])).sort(), [books]);
+  const themes = useMemo(
+    () => Array.from(new Set(books?.flatMap((b) => b.tags) ?? [])).sort(),
+    [books],
+  );
   const filtered = (books ?? []).filter((b) => {
     if (level && b.level !== level) return false;
     if (theme && !b.tags.includes(theme)) return false;
@@ -51,31 +67,53 @@ function Library() {
   });
 
   const chip = (active: boolean) =>
-    cn("min-h-10 rounded-full border px-4 text-sm font-semibold", active ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-muted");
+    cn(
+      "min-h-10 rounded-full border px-4 text-sm font-semibold",
+      active ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-muted",
+    );
 
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Book library</h1>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-        <Input aria-label="Search by title" placeholder="Search by title" value={q} onChange={(e) => setQ(e.target.value)} className="min-h-12 pl-9" />
+        <Search
+          className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+          aria-hidden
+        />
+        <Input
+          aria-label="Search by title"
+          placeholder="Search by title"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="min-h-12 pl-9"
+        />
       </div>
       <div className="space-y-3">
         <div className="flex flex-wrap gap-2" role="group" aria-label="Level">
-          <button className={chip(level === null)} onClick={() => setLevel(null)}>All levels</button>
+          <button className={chip(level === null)} onClick={() => setLevel(null)}>
+            All levels
+          </button>
           {[1, 2, 3].map((l) => (
-            <button key={l} className={chip(level === l)} onClick={() => setLevel(l)}>Level {l}</button>
+            <button key={l} className={chip(level === l)} onClick={() => setLevel(l)}>
+              Level {l}
+            </button>
           ))}
         </div>
         <div className="flex flex-wrap gap-2" role="group" aria-label="Length">
           {lengths.map((l) => (
-            <button key={l.id} className={chip(length === l.id)} onClick={() => setLength(l.id)}>{l.label}</button>
+            <button key={l.id} className={chip(length === l.id)} onClick={() => setLength(l.id)}>
+              {l.label}
+            </button>
           ))}
         </div>
         <div className="flex flex-wrap gap-2" role="group" aria-label="Theme">
-          <button className={chip(theme === null)} onClick={() => setTheme(null)}>All themes</button>
+          <button className={chip(theme === null)} onClick={() => setTheme(null)}>
+            All themes
+          </button>
           {themes.map((t) => (
-            <button key={t} className={chip(theme === t)} onClick={() => setTheme(t)}>{t}</button>
+            <button key={t} className={chip(theme === t)} onClick={() => setTheme(t)}>
+              {t}
+            </button>
           ))}
         </div>
       </div>
@@ -84,7 +122,8 @@ function Library() {
       {error && <p className="text-destructive">Could not load books.</p>}
       {books && books.length === 0 && (
         <p className="rounded-2xl border bg-secondary p-4 text-secondary-foreground">
-          The library unlocks once you're qualified. Finish the Volunteer Guide and quiz first (see Guide in the menu).
+          The library unlocks once you're qualified. Finish the Volunteer Guide and quiz first (see
+          Guide in the menu).
         </p>
       )}
 
@@ -102,13 +141,19 @@ function Library() {
               <p className="mt-1 flex-1 text-sm text-muted-foreground">{b.summary}</p>
               <p className="mt-3 flex items-center gap-1 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" aria-hidden /> {b.reading_time} min
-                {b.status === "draft" && <span className="ml-auto rounded bg-accent px-2 text-xs font-bold text-accent-foreground">Draft</span>}
+                {b.status === "draft" && (
+                  <span className="ml-auto rounded bg-accent px-2 text-xs font-bold text-accent-foreground">
+                    Draft
+                  </span>
+                )}
               </p>
             </Link>
           </li>
         ))}
       </ul>
-      {books && books.length > 0 && filtered.length === 0 && <p className="text-muted-foreground">No books match these filters.</p>}
+      {books && books.length > 0 && filtered.length === 0 && (
+        <p className="text-muted-foreground">No books match these filters.</p>
+      )}
     </div>
   );
 }

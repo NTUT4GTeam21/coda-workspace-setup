@@ -3,7 +3,9 @@ import { signUpErrorMessage } from "@/lib/signup-errors";
 
 describe("signUpErrorMessage", () => {
   it("shows the volunteer code message only for volunteer code errors", () => {
-    expect(signUpErrorMessage("Invalid or already used volunteer code")).toContain("volunteer code");
+    expect(signUpErrorMessage("Invalid or already used volunteer code")).toContain(
+      "volunteer code",
+    );
   });
   it("shows the staff code message only for staff code errors", () => {
     expect(signUpErrorMessage("Invalid or already used staff code")).toContain("staff code");
@@ -13,7 +15,12 @@ describe("signUpErrorMessage", () => {
       "That code doesn't match the account type you chose. Use VOLUNTEER for Volunteer, or ADMIN for Programme Staff.",
     );
   });
-  it.each(["Email rate limit exceeded", "over_email_send_rate_limit", "Rate limit exceeded for email sending", "Too many signup emails"])("explains email throttling: %s", (error) => {
+  it.each([
+    "Email rate limit exceeded",
+    "over_email_send_rate_limit",
+    "Rate limit exceeded for email sending",
+    "Too many signup emails",
+  ])("explains email throttling: %s", (error) => {
     expect(signUpErrorMessage(error)).toBe(
       "Too many sign-ups in a short time. Please try again in an hour.",
     );

@@ -3,8 +3,16 @@ import { buildQuiz } from "@/lib/quiz-builder";
 
 const cards = [
   { word: "rain", definition: "water falling from the sky", example_sentence: "The rain is loud." },
-  { word: "hide", definition: "to go where no one can see you", example_sentence: "Bao will hide under the table." },
-  { word: "cosy", definition: "warm and comfortable", example_sentence: "The cosy blanket is soft." },
+  {
+    word: "hide",
+    definition: "to go where no one can see you",
+    example_sentence: "Bao will hide under the table.",
+  },
+  {
+    word: "cosy",
+    definition: "warm and comfortable",
+    example_sentence: "The cosy blanket is soft.",
+  },
 ];
 
 it("builds a definition question whose options include the correct answer", () => {

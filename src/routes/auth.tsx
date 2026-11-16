@@ -107,7 +107,11 @@ function AuthPage() {
           ) : (
             <>
               <h1 className="mt-4 text-2xl font-bold">
-                {mode === "signin" ? "Sign in" : mode === "forgot" ? "Reset your password" : "Create an account"}
+                {mode === "signin"
+                  ? "Sign in"
+                  : mode === "forgot"
+                    ? "Reset your password"
+                    : "Create an account"}
               </h1>
               {mode === "forgot" && (
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -143,7 +147,9 @@ function AuthPage() {
                     {role !== "viewer" && (
                       <div className="space-y-1.5">
                         <Label htmlFor="code">
-                          {role === "staff" ? "Staff code from SADeaf" : "Volunteer code from SADeaf"}
+                          {role === "staff"
+                            ? "Staff code from SADeaf"
+                            : "Volunteer code from SADeaf"}
                         </Label>
                         <Input
                           id="code"
@@ -195,7 +201,13 @@ function AuthPage() {
                   </div>
                 )}
                 <Button type="submit" disabled={busy} className="min-h-11 w-full text-base">
-                  {busy ? "Please wait…" : mode === "signin" ? "Sign in" : mode === "forgot" ? "Send reset link" : "Sign up"}
+                  {busy
+                    ? "Please wait…"
+                    : mode === "signin"
+                      ? "Sign in"
+                      : mode === "forgot"
+                        ? "Send reset link"
+                        : "Sign up"}
                 </Button>
               </form>
               {mode === "signin" && (

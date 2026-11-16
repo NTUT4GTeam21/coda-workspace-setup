@@ -47,7 +47,9 @@ export function buildQuiz(wordCards: WordCardInput[], discussionPrompts: string[
     });
   }
 
-  const sentenceCard = cards.find((c) => c.example_sentence.toLowerCase().includes(c.word.toLowerCase()));
+  const sentenceCard = cards.find((c) =>
+    c.example_sentence.toLowerCase().includes(c.word.toLowerCase()),
+  );
   if (sentenceCard) {
     const blanked = sentenceCard.example_sentence.replace(
       new RegExp(sentenceCard.word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"),

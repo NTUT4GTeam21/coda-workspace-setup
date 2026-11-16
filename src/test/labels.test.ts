@@ -14,19 +14,25 @@ it("shows finished book as Yes / Partly / No", () => {
 });
 
 it("turns the level-fit constraint error into a friendly message", () => {
-  const msg = friendlySaveError('new row violates check constraint "handover_feedback_level_fit_check"');
+  const msg = friendlySaveError(
+    'new row violates check constraint "handover_feedback_level_fit_check"',
+  );
   expect(msg).toContain("Too easy");
   expect(msg).not.toContain("check constraint");
 });
 
 it("turns the finished-book constraint error into a friendly message", () => {
-  const msg = friendlySaveError('new row violates check constraint "handover_feedback_finished_book_check"');
+  const msg = friendlySaveError(
+    'new row violates check constraint "handover_feedback_finished_book_check"',
+  );
   expect(msg).toContain("Yes, Partly or No");
   expect(msg).not.toContain("check constraint");
 });
 
 it("turns duplicate tricky words into a friendly message", () => {
-  expect(friendlySaveError('duplicate key value violates unique constraint "tricky_words_child_word_unique"')).toBe(
-    "That word is already on this child's list.",
-  );
+  expect(
+    friendlySaveError(
+      'duplicate key value violates unique constraint "tricky_words_child_word_unique"',
+    ),
+  ).toBe("That word is already on this child's list.");
 });
