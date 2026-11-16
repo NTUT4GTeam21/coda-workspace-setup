@@ -46,6 +46,7 @@ _Update when folders or key files are added, moved or removed._
 
 ```
 /               README, CLAUDE.md, CHANGELOG.md, PROGRESS.md
+                HOWTOUSE.md: handover guide for the next project group
                 AGENTS.md: architecture rules kept by Lovable; roadmap.md: Lovable's task list
                 package.json, bun.lock, vite/vitest/eslint/prettier/drizzle config files
 /.lovable       Lovable project metadata and north-star note (do not edit)
